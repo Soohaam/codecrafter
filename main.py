@@ -68,32 +68,118 @@ thread = threading.Thread(target=capture_frames, daemon=True)
 thread.start()
 
 def generate_object_detection_frames():
-    """Generate frames with general object detection."""
+    """Generate frames with general object detection and detailed movement logging."""
+    
+    global global_frame, object_positions
+    object_positions = {}  # Store previous positions for tracking
+    MOVEMENT_THRESHOLD = 10  # Pixels threshold for movement detection
+    FRAME_HISTORY = 5  # Number of frames to keep for movement analysis
+    
     while True:
         with lock:
             if global_frame is None:
                 continue
             frame = global_frame.copy()
 
-        # General Object Detection with SSD MobileNet
+        # Get frame dimensions
         h, w, _ = frame.shape
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # General Object Detection with SSD MobileNet
         classIds, confs, bbox = net.detect(frame, confThreshold=0.55, nmsThreshold=0.2)
+
+        current_detections = {}
 
         if len(classIds) > 0:
             classIds = np.array(classIds).flatten()
             confs = np.array(confs).flatten()
 
-            for classId, conf, box in zip(classIds, confs, bbox):
+            for detection_idx, (classId, conf, box) in enumerate(zip(classIds, confs, bbox)):
                 x, y, w_box, h_box = box
                 x = max(0, x)
                 y = max(0, y)
                 w_box = min(w_box, w - x)
                 h_box = min(h_box, h - y)
 
+                # Calculate center point
+                center_x = x + w_box // 2
+                center_y = y + h_box // 2
+
+                # Generate unique ID for this detection
+                detection_id = f"{classId}_{center_x}_{center_y}"
+
+                # Store current position
+                current_detections[detection_id] = {
+                    'timestamp': timestamp,
+                    'class_id': classId,
+                    'class_name': classNames[classId - 1],
+                    'confidence': conf,
+                    'bbox': (x, y, w_box, h_box),
+                    'center': (center_x, center_y),
+                    'history': []
+                }
+
+                # Match with previous detections
+                if detection_id in object_positions:
+                    current_detections[detection_id]['history'] = object_positions[detection_id]['history'][-FRAME_HISTORY:]
+
+                # Update position history
+                current_detections[detection_id]['history'].append({
+                    'timestamp': timestamp,
+                    'center': (center_x, center_y)
+                })
+
+                # Analyze movement
+                movement_state = "Stationary"
+                if len(current_detections[detection_id]['history']) >= 2:
+                    prev_pos = current_detections[detection_id]['history'][-2]['center']
+                    curr_pos = current_detections[detection_id]['history'][-1]['center']
+                    
+                    distance = np.sqrt((curr_pos[0] - prev_pos[0])**2 + 
+                                    (curr_pos[1] - prev_pos[1])**2)
+                    
+                    if distance > MOVEMENT_THRESHOLD:
+                        # Estimate speed based on distance
+                        if distance > MOVEMENT_THRESHOLD * 2:
+                            movement_state = "Running"
+                        else:
+                            movement_state = "Walking"
+
+                # Log detailed information
+                print(f"Object Detection - ID: {detection_id}")
+                print(f"  Timestamp: {timestamp}")
+                print(f"  Type: {classNames[classId - 1].upper()}")
+                print(f"  Confidence: {conf:.2f}")
+                print(f"  Bounding Box (pixels):")
+                print(f"    Top-left: ({x}, {y})")
+                print(f"    Bottom-right: ({x + w_box}, {y + h_box})")
+                print(f"    Center: ({center_x}, {center_y})")
+                print(f"    Dimensions: {w_box}x{h_box}")
+                print(f"  Normalized Coordinates:")
+                print(f"    Top-left: ({x/w:.3f}, {y/h:.3f})")
+                print(f"    Bottom-right: ({(x + w_box)/w:.3f}, {(y + h_box)/h:.3f})")
+                print(f"    Center: ({center_x/w:.3f}, {center_y/h:.3f})")
+                print(f"  Movement State: {movement_state}")
+                if len(current_detections[detection_id]['history']) >= 2:
+                    print(f"  Distance from last position: {distance:.1f} pixels")
+                print(f"  Frame dimensions: {w}x{h}")
+                print("-" * 50)
+
+                # Draw on frame
                 cvzone.cornerRect(frame, (x, y, w_box, h_box))
-                cv2.putText(frame, f'{classNames[classId - 1].upper()} {round(conf * 100, 2)}%',
-                            (x + 10, y + 30), cv2.FONT_HERSHEY_COMPLEX_SMALL,
-                            1, (0, 255, 0), 2)
+                cv2.putText(frame, 
+                           f'{classNames[classId - 1].upper()} {round(conf * 100, 2)}%',
+                           (x + 10, y + 30), 
+                           cv2.FONT_HERSHEY_COMPLEX_SMALL,
+                           1, (0, 255, 0), 2)
+                cv2.putText(frame, 
+                           f'State: {movement_state}',
+                           (x + 10, y + 50),
+                           cv2.FONT_HERSHEY_COMPLEX_SMALL,
+                           0.7, (0, 255, 0), 1)
+
+        # Update object positions
+        object_positions = current_detections
 
         _, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()

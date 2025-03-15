@@ -1,19 +1,35 @@
 "use client"; // Required for client-side hooks and animations
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
+import React, { useState, useEffect, useRef } from "react";
+import { 
+  Shield, 
+  Eye, 
+  Zap, 
+  Radio, 
+  Waypoints, 
+  Radar, 
+  Camera, 
+  Network, 
+  Lock, 
+  Server, 
+  Cable, 
+  Satellite, 
+  Radio as RadioIcon, 
+  Scan, 
+  AreaChart, 
+  LayoutGrid, 
   ArrowRight,
-  Heart,
-  MessageCircle,
-  Users,
-  Shield,
-  Brain,
-  Puzzle,
   ChevronDown,
+  Menu,
+  X, 
+  Twitter, 
+  Linkedin, 
+  Github, 
+  Facebook, 
+  Clock 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 // Custom hooks for animations
 const useTypewriter = (text: string, speed: number) => {
@@ -33,7 +49,7 @@ const useTypewriter = (text: string, speed: number) => {
     return () => clearInterval(typing);
   }, [text, speed]);
 
-  return displayText; // Simplified return
+  return displayText;
 };
 
 const useElementOnScreen = (options: IntersectionObserverInit) => {
@@ -56,171 +72,201 @@ const useElementOnScreen = (options: IntersectionObserverInit) => {
     };
   }, [ref, options]);
 
-  return { ref: setRef, isVisible }; // Type-safe ref setter
+  return { ref: setRef, isVisible };
 };
 
-// Loading component
-const LoadingScreen = () => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-black overflow-hidden">
-    {/* Background Glow */}
-    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-transparent animate-pulse-slow"></div>
+// Header Component
+const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
-    {/* Central Core */}
-    <div className="relative flex items-center justify-center">
-      {/* Orbiting Particles */}
-      <div className="absolute w-32 h-32 animate-spin-slow">
-        {[0, 1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="absolute w-3 h-3 bg-cyan-400 rounded-full shadow-[0_0_10px_2px_rgba(34,211,238,0.8)]"
-            style={{
-              top: `${Math.sin((i * Math.PI) / 2) * 50 + 50}%`,
-              left: `${Math.cos((i * Math.PI) / 2) * 50 + 50}%`,
-              animation: `orbit 2s linear ${i * 0.5}s infinite`,
-            }}
-          />
-        ))}
-      </div>
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-      {/* Core Element */}
-      <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 shadow-[0_0_20px_5px_rgba(34,211,238,0.5)] animate-pulse-fast">
-        <div className="absolute inset-1 rounded-full bg-black/50 backdrop-blur-md"></div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-cyan-300 rounded-full animate-spin"></div>
-        </div>
-      </div>
 
-      {/* Loading Text */}
-      <div className="absolute bottom-[-3rem] text-cyan-300 text-lg font-mono tracking-wider animate-pulse-slow">
-        Initializing...
-      </div>
-    </div>
+};
 
-    {/* Custom Styles */}
-    <style jsx global>{`
-      @keyframes pulse-slow {
-        0%, 100% { opacity: 0.6; }
-        50% { opacity: 1; }
-      }
-      @keyframes pulse-fast {
-        0%, 100% { transform: scale(1); opacity: 0.8; }
-        50% { transform: scale(1.05); opacity: 1; }
-      }
-      @keyframes spin-slow {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      @keyframes orbit {
-        0% { transform: translate(0, 0) scale(1); opacity: 0.8; }
-        50% { transform: translate(5px, -5px) scale(1.2); opacity: 1; }
-        100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
-      }
-    `}</style>
-  </div>
-);
+
 
 // Hero Section
 const HeroSection = () => {
-  const displayText = useTypewriter("Find your digital family, one conversation at a time.", 50);
-
+  const titleText = useTypewriter("Advanced Autonomous Surveillance System", 50);
+  const subtitleText = useTypewriter("Multi-sensor data fusion for comprehensive threat detection", 30);
+  
   return (
-    <section className="relative pt-32 pb-20 min-h-[90vh] flex items-center bg-gradient-to-br from-purple-500/20 via-indigo-500/10 to-violet-500/20">
-      <div className="container mx-auto px-6 md:px-12">
+    <section className="relative pt-32 pb-20 min-h-screen flex items-center overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 grid-pattern opacity-20 z-0"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-surveillance-accent/5 to-transparent z-0"></div>
+      
+      {/* Abstract Elements */}
+      <div className="absolute -top-20 -right-20 w-96 h-96 bg-surveillance-accent/5 rounded-full blur-3xl"></div>
+      <div className="absolute top-1/2 -left-48 w-96 h-96 bg-surveillance-accent/10 rounded-full blur-3xl"></div>
+      
+      {/* Animated Scanner Line */}
+      <div className="absolute left-0 right-0 h-40 overflow-hidden">
+        <div className="scanning-line animate-scanning"></div>
+      </div>
+      
+      {/* Hero Content */}
+      <div className="container mx-auto px-4 md:px-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-7 max-w-3xl">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-block px-3 py-1 mb-6 rounded-full bg-indigo-100 font-medium text-sm text-indigo-800"
-            >
-              Welcome to a new kind of connection
-            </motion.div>
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight bg-gradient-to-r from-indigo-700 via-purple-700 to-violet-700 bg-clip-text text-transparent"
-            >
-              Experience the warmth of family through <span className="text-indigo-600">AI companions</span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-xl text-gray-700 mb-8 leading-relaxed h-16"
-            >
-              {displayText}
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-wrap gap-4"
-            >
-              <Button size="lg" className="gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
-                Start Chatting <ArrowRight className="w-4 h-4" />
+          {/* Text Content */}
+          <div className="lg:col-span-6 max-w-3xl">
+            <div className="inline-flex items-center px-3 py-1 mb-6 rounded-full bg-surveillance-accent/10 border border-surveillance-accent/20">
+              <Zap className="w-4 h-4 mr-2 text-surveillance-accent" />
+              <span className="text-sm font-medium text-surveillance-accent">Next-Gen Surveillance</span>
+            </div>
+            
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+              {titleText}
+            </h1>
+            
+            <p className="text-xl text-foreground/80 mb-8 leading-relaxed h-16">
+              {subtitleText}
+            </p>
+            
+            <div className="flex flex-wrap gap-4">
+              <Button size="lg" className="gap-2 bg-surveillance-accent hover:bg-surveillance-accent/90 text-white shadow-glow-sm">
+                Explore Technology <ArrowRight className="w-4 h-4" />
               </Button>
-              <Button size="lg" variant="outline" className="border-indigo-300 hover:bg-indigo-50">
-                Explore Family Models
+              <Button size="lg" variant="outline" className="border-surveillance-accent hover:bg-surveillance-accent/10 text-surveillance-accent">
+                View Demo
               </Button>
-            </motion.div>
+            </div>
+            
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-6 mt-12 max-w-xl">
+              <div>
+                <div className="text-3xl font-bold text-surveillance-accent">99.8%</div>
+                <div className="text-sm text-foreground/60">Detection Rate</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-surveillance-accent">&lt;0.5s</div>
+                <div className="text-sm text-foreground/60">Response Time</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-surveillance-accent">24/7</div>
+                <div className="text-sm text-foreground/60">Monitoring</div>
+              </div>
+            </div>
           </div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.4 }}
-            className="lg:col-span-5 relative"
-          >
-            <div className="relative w-full aspect-square max-w-md mx-auto">
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-violet-500/20 to-indigo-600/20 animate-pulse"></div>
-              <div
-                className="absolute -top-6 -left-6 w-24 h-24 rounded-2xl bg-indigo-200 rotate-12"
-                style={{ animation: "float 6s ease-in-out infinite" }}
-              ></div>
-              <div
-                className="absolute -bottom-8 -right-4 w-32 h-32 rounded-full bg-purple-200"
-                style={{ animation: "float 8s ease-in-out 2s infinite" }}
-              ></div>
-              <div className="absolute inset-4 rounded-2xl bg-white/70 backdrop-blur-xl shadow-xl border border-white/40 flex items-center justify-center p-6 overflow-hidden">
-                <div className="relative w-full max-w-[280px] mx-auto">
-                  <div className="absolute top-0 left-0 right-0 h-8 bg-indigo-800/5 rounded-t-lg"></div>
-                  <div className="pt-12 pb-4 px-4">
-                    <div className="mb-4 animate-pulse">
-                      <div className="h-8 bg-indigo-800/10 rounded-full w-3/4 mb-2"></div>
-                      <div className="h-4 bg-indigo-800/5 rounded-full w-1/2"></div>
-                    </div>
-                    <div className="flex items-start gap-3 mb-3 opacity-90">
-                      <div className="w-8 h-8 rounded-full bg-purple-500 flex-shrink-0"></div>
-                      <div className="bg-indigo-100 rounded-xl rounded-tl-none p-3 text-sm">
-                        Hello! I'm Mom. How was your day today?
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3 mb-3 flex-row-reverse opacity-95">
-                      <div className="w-8 h-8 rounded-full bg-indigo-600 flex-shrink-0"></div>
-                      <div className="bg-white rounded-xl rounded-tr-none p-3 text-sm shadow-sm">
-                        It was great! I got an A on my test.
-                      </div>
-                    </div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 1 }}
-                      className="flex items-start gap-3"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-purple-500 flex-shrink-0"></div>
-                      <div className="bg-indigo-100 rounded-xl rounded-tl-none p-3 text-sm">
-                        That's wonderful! I'm so proud of you! Would you like to tell me more about it?
-                      </div>
-                    </motion.div>
+          
+          {/* 3D Visualization */}
+          <div className="lg:col-span-6 relative">
+            <div className="relative w-full aspect-square max-w-xl mx-auto">
+              {/* Visualization Container */}
+              <div className="absolute inset-0 rounded-2xl glassmorphism shadow-glow-md p-6 overflow-hidden">
+                {/* Animated Grid */}
+                <div className="absolute inset-0 grid-pattern opacity-30"></div>
+                
+                {/* Radar Display */}
+                <div className="absolute inset-10 flex items-center justify-center opacity-50">
+                  <div className="w-full h-full border-2 border-surveillance-accent/20 rounded-full"></div>
+                  <div className="absolute w-3/4 h-3/4 border border-surveillance-accent/30 rounded-full"></div>
+                  <div className="absolute w-1/2 h-1/2 border border-surveillance-accent/40 rounded-full"></div>
+                  <div className="absolute w-1/4 h-1/4 border border-surveillance-accent/50 rounded-full"></div>
+                  
+                  {/* Radar Sweep */}
+                  <div className="absolute w-full h-full animate-radar-spin" style={{ animationDuration: '8s' }}>
+                    <div className="absolute top-1/2 left-1/2 w-1/2 h-1 bg-gradient-to-r from-surveillance-accent/80 to-transparent origin-left"></div>
                   </div>
+                </div>
+                
+                {/* Sensor Data Visualization */}
+                <div className="absolute inset-0 p-4">
+                  {/* Camera Feed */}
+                  <div className="absolute top-4 left-4 w-36 h-24 rounded bg-surveillance-dark/60 border border-surveillance-accent/20 overflow-hidden">
+                    <div className="absolute top-2 left-2 flex items-center">
+                      <div className="w-2 h-2 rounded-full bg-surveillance-accent animate-pulse"></div>
+                      <span className="text-xs text-surveillance-accent ml-1">CAMERA</span>
+                    </div>
+                    <div className="h-full w-full flex items-center justify-center opacity-70">
+                      <Camera className="w-8 h-8 text-surveillance-accent/70" />
+                    </div>
+                  </div>
+                  
+                  {/* Laser Data */}
+                  <div className="absolute top-4 right-4 w-36 h-24 rounded bg-surveillance-dark/60 border border-surveillance-accent/20 overflow-hidden">
+                    <div className="absolute top-2 left-2 flex items-center">
+                      <div className="w-2 h-2 rounded-full bg-surveillance-accent animate-pulse"></div>
+                      <span className="text-xs text-surveillance-accent ml-1">LIDAR</span>
+                    </div>
+                    <div className="h-full w-full flex items-center justify-center opacity-70">
+                      <Scan className="w-8 h-8 text-surveillance-accent/70" />
+                    </div>
+                  </div>
+                  
+                  {/* Fiber Optic */}
+                  <div className="absolute bottom-4 left-4 w-36 h-24 rounded bg-surveillance-dark/60 border border-surveillance-accent/20 overflow-hidden">
+                    <div className="absolute top-2 left-2 flex items-center">
+                      <div className="w-2 h-2 rounded-full bg-surveillance-accent animate-pulse"></div>
+                      <span className="text-xs text-surveillance-accent ml-1">FIBER OPTIC</span>
+                    </div>
+                    <div className="h-full w-full flex items-center justify-center opacity-70">
+                      <Cable className="w-8 h-8 text-surveillance-accent/70" />
+                    </div>
+                  </div>
+                  
+                  {/* UGS Data */}
+                  <div className="absolute bottom-4 right-4 w-36 h-24 rounded bg-surveillance-dark/60 border border-surveillance-accent/20 overflow-hidden">
+                    <div className="absolute top-2 left-2 flex items-center">
+                      <div className="w-2 h-2 rounded-full bg-surveillance-accent animate-pulse"></div>
+                      <span className="text-xs text-surveillance-accent ml-1">UGS</span>
+                    </div>
+                    <div className="h-full w-full flex items-center justify-center opacity-70">
+                      <RadioIcon className="w-8 h-8 text-surveillance-accent/70" />
+                    </div>
+                  </div>
+                  
+                  {/* Central Fusion Display */}
+                  <div className="absolute inset-32 rounded-full bg-surveillance-dark/40 border border-surveillance-accent/30 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-surveillance-accent font-mono text-sm mb-1">FUSION CORE</div>
+                      <div className="w-16 h-16 mx-auto relative">
+                        <div className="absolute inset-0 rounded-full bg-surveillance-accent/20 animate-pulse"></div>
+                        <div className="absolute inset-2 rounded-full bg-surveillance-accent/10 flex items-center justify-center">
+                          <AreaChart className="w-8 h-8 text-surveillance-accent" />
+                        </div>
+                      </div>
+                      <div className="text-xs text-surveillance-accent/80 mt-1 font-mono">PROCESSING</div>
+                    </div>
+                  </div>
+                  
+                  {/* Data Flow Lines */}
+                  <svg className="absolute inset-0 w-full h-full" style={{ pointerEvents: 'none' }}>
+                    {/* Camera to Center */}
+                    <line x1="54" y1="54" x2="50%" y2="50%" stroke="rgba(14, 165, 233, 0.3)" strokeWidth="1" strokeDasharray="5,5" />
+                    {/* Lidar to Center */}
+                    <line x1="calc(100% - 54px)" y1="54" x2="50%" y2="50%" stroke="rgba(14, 165, 233, 0.3)" strokeWidth="1" strokeDasharray="5,5" />
+                    {/* Fiber to Center */}
+                    <line x1="54" y1="calc(100% - 54px)" x2="50%" y2="50%" stroke="rgba(14, 165, 233, 0.3)" strokeWidth="1" strokeDasharray="5,5" />
+                    {/* UGS to Center */}
+                    <line x1="calc(100% - 54px)" y1="calc(100% - 54px)" x2="50%" y2="50%" stroke="rgba(14, 165, 233, 0.3)" strokeWidth="1" strokeDasharray="5,5" />
+                    
+                    {/* Animated Data Particles */}
+                    <circle className="animate-data-flow" cx="35%" cy="35%" r="2" fill="#0EA5E9" style={{ animationDelay: '0s' }} />
+                    <circle className="animate-data-flow" cx="65%" cy="35%" r="2" fill="#0EA5E9" style={{ animationDelay: '1s' }} />
+                    <circle className="animate-data-flow" cx="35%" cy="65%" r="2" fill="#0EA5E9" style={{ animationDelay: '2s' }} />
+                    <circle className="animate-data-flow" cx="65%" cy="65%" r="2" fill="#0EA5E9" style={{ animationDelay: '3s' }} />
+                  </svg>
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
-      <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent"></div>
+      
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
+        <span className="text-sm text-foreground/60 mb-2">Scroll to explore</span>
+        <ChevronDown className="w-5 h-5 text-surveillance-accent animate-bounce" />
+      </div>
     </section>
   );
 };
@@ -229,35 +275,34 @@ const HeroSection = () => {
 const FeaturesSection = () => {
   const features = [
     {
-      icon: <Heart className="w-10 h-10 text-purple-500" />,
-      title: "Emotional Support",
-      description:
-        "Experience the warmth and understanding that comes from meaningful family interactions, available whenever you need it.",
+      icon: <Camera className="w-10 h-10 text-surveillance-accent" />,
+      title: "Advanced Camera Systems",
+      description: "High-resolution imaging with AI-powered object recognition for visual identification and tracking.",
     },
     {
-      icon: <MessageCircle className="w-10 h-10 text-indigo-600" />,
-      title: "Natural Conversations",
-      description: "Engage in authentic, flowing conversations that adapt to your personal communication style.",
+      icon: <Scan className="w-10 h-10 text-surveillance-accent" />,
+      title: "Laser Detection",
+      description: "Precision LIDAR mapping for accurate distance measurements and 3D environmental modeling.",
     },
     {
-      icon: <Users className="w-10 h-10 text-purple-500" />,
-      title: "Multiple Family Roles",
-      description: "Connect with different family member models, each with their own unique personality and perspective.",
+      icon: <Cable className="w-10 h-10 text-surveillance-accent" />,
+      title: "Buried Fiber Optics",
+      description: "Underground fiber optic networks that detect vibrations and movements for perimeter security.",
     },
     {
-      icon: <Shield className="w-10 h-10 text-indigo-600" />,
-      title: "Safe Environment",
-      description: "Enjoy a judgment-free space where you can express yourself openly and honestly.",
+      icon: <RadioIcon className="w-10 h-10 text-surveillance-accent" />,
+      title: "Unattended Ground Sensors",
+      description: "Self-contained sensor units detecting acoustic, seismic, magnetic, and infrared signatures.",
     },
     {
-      icon: <Brain className="w-10 h-10 text-purple-500" />,
-      title: "Personalized Interaction",
-      description: "Family models learn and adapt to your preferences, creating more meaningful connections over time.",
+      icon: <AreaChart className="w-10 h-10 text-surveillance-accent" />,
+      title: "Data Fusion Core",
+      description: "Advanced algorithms merging multi-sensor inputs for comprehensive situational awareness.",
     },
     {
-      icon: <Puzzle className="w-10 h-10 text-indigo-600" />,
-      title: "Growth & Development",
-      description: "Receive guidance and support for personal growth in a nurturing, family-like environment.",
+      icon: <Eye className="w-10 h-10 text-surveillance-accent" />,
+      title: "AI-Powered Analysis",
+      description: "Machine learning systems that continuously improve threat detection and reduce false alarms.",
     },
   ];
 
@@ -271,14 +316,17 @@ const FeaturesSection = () => {
     return (
       <div
         ref={ref}
-        className={`bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 transform ${
-          isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
-        }`}
+        className={cn(
+          "glassmorphism rounded-xl p-6 hover:shadow-glow-sm transition-all duration-300 transform glow-effect",
+          isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+        )}
         style={{ transitionDelay: `${index * 100}ms` }}
       >
-        <div className="mb-4">{feature.icon}</div>
+        <div className="bg-surveillance-accent/10 rounded-lg w-16 h-16 flex items-center justify-center mb-4">
+          {feature.icon}
+        </div>
         <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-        <p className="text-gray-600">{feature.description}</p>
+        <p className="text-muted-foreground">{feature.description}</p>
       </div>
     );
   };
@@ -290,19 +338,28 @@ const FeaturesSection = () => {
   });
 
   return (
-    <section className="py-20 bg-white">
-      <div className="container mx-auto px-6 md:px-12">
+    <section id="features" className="py-20 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 grid-pattern opacity-10"></div>
+      <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-surveillance-accent/5 blur-3xl"></div>
+      
+      <div className="container mx-auto px-4 md:px-6">
         <div
           ref={ref}
-          className={`text-center max-w-3xl mx-auto mb-16 transition-opacity duration-700 ${
-            isVisible ? "opacity-100" : "opacity-0"
-          }`}
+          className={cn(
+            "text-center max-w-3xl mx-auto mb-16 transition-all duration-700",
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          )}
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            Why Choose Our Family Models?
+          <div className="inline-flex items-center px-3 py-1 mb-4 rounded-full bg-surveillance-accent/10 border border-surveillance-accent/20">
+            <Radar className="w-4 h-4 mr-2 text-surveillance-accent" />
+            <span className="text-sm font-medium text-surveillance-accent">Sensor Technology</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient">
+            Multi-Sensor Architecture
           </h2>
-          <p className="text-lg text-gray-600">
-            Our AI-powered family members provide the support, understanding, and connection that everyone deserves, accessible anytime you need it.
+          <p className="text-lg text-muted-foreground">
+            Our system integrates multiple sensor types to create an impenetrable surveillance network that detects, identifies, and responds to threats in real-time.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -315,87 +372,186 @@ const FeaturesSection = () => {
   );
 };
 
-// Family Models Section
-const FamilyModels = () => {
+// Data Fusion Section
+const DataFusionSection = () => {
   const { ref, isVisible } = useElementOnScreen({
     root: null,
     rootMargin: "0px",
     threshold: 0.1,
   });
 
-  const models = [
+  return (
+    <section id="data-fusion" className="py-20 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-surveillance-dark"></div>
+      <div className="absolute inset-0 grid-pattern opacity-20"></div>
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-surveillance-accent/30 to-transparent"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-surveillance-accent/30 to-transparent"></div>
+      
+      <div className="container mx-auto px-4 md:px-6 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Visualization */}
+          <div className="lg:col-span-6 order-2 lg:order-1">
+            <div 
+              ref={ref}
+              className={cn(
+                "relative aspect-square max-w-xl mx-auto transition-all duration-700",
+                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"
+              )}
+            >
+              {/* Data Fusion Visualization */}
+              <div className="absolute inset-0 rounded-2xl glassmorphism shadow-glow-md overflow-hidden">
+                <div className="absolute inset-0 grid-pattern opacity-20"></div>
+                
+                {/* Central Hub */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="relative w-40 h-40">
+                    {/* Orbiting Rings */}
+                    <div className="absolute inset-0 rounded-full border border-surveillance-accent/30 animate-spin-slow" style={{ animationDuration: '20s' }}></div>
+                    <div className="absolute inset-4 rounded-full border border-surveillance-accent/40 animate-spin-slow-reverse" style={{ animationDuration: '15s' }}></div>
+                    <div className="absolute inset-8 rounded-full border border-surveillance-accent/50 animate-spin-slow" style={{ animationDuration: '10s' }}></div>
+                    
+                    {/* Core */}
+                    <div className="absolute inset-12 rounded-full bg-surveillance-accent/20 flex items-center justify-center shadow-glow-md animate-pulse-slow">
+                      <Network className="w-8 h-8 text-surveillance-accent" />
+                    </div>
+                    
+                    {/* Orbiting Nodes */}
+                    {[0, 60, 120, 180, 240, 300].map((angle, index) => (
+                      <div 
+                        key={index}
+                        className="absolute w-8 h-8 rounded-full bg-surveillance-dark border border-surveillance-accent/50 flex items-center justify-center shadow-glow-sm orbit-element"
+                        style={{ 
+                          transform: `rotate(${angle}deg) translateX(80px) rotate(-${angle}deg)`,
+                          animationDelay: `${index * -2.5}s`
+                        }}
+                      >
+                        {index === 0 && <Camera className="w-4 h-4 text-surveillance-accent" />}
+                        {index === 1 && <Scan className="w-4 h-4 text-surveillance-accent" />}
+                        {index === 2 && <Cable className="w-4 h-4 text-surveillance-accent" />}
+                        {index === 3 && <RadioIcon className="w-4 h-4 text-surveillance-accent" />}
+                        {index === 4 && <Satellite className="w-4 h-4 text-surveillance-accent" />}
+                        {index === 5 && <Eye className="w-4 h-4 text-surveillance-accent" />}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Data Flow Lines */}
+                <div className="absolute inset-0">
+                  {[...Array(20)].map((_, i) => (
+                    <div 
+                      key={i}
+                      className="data-dot"
+                      style={{
+                        top: `${Math.random() * 100}%`,
+                        left: `${Math.random() * 100}%`,
+                        animationDelay: `${i * 0.3}s`,
+                        animationDuration: `${2 + Math.random() * 3}s`
+                      }}
+                    ></div>
+                  ))}
+                </div>
+                
+                {/* Labels */}
+                <div className="absolute top-4 left-4 font-mono text-xs text-surveillance-accent">DATA FUSION SYSTEM</div>
+                <div className="absolute bottom-4 right-4 font-mono text-xs text-surveillance-accent">REAL-TIME PROCESSING</div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Text Content */}
+          <div className="lg:col-span-6 order-1 lg:order-2">
+            <div 
+              ref={ref}
+              className={cn(
+                "transition-all duration-700 delay-300",
+                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+              )}
+            >
+              <div className="inline-flex items-center px-3 py-1 mb-6 rounded-full bg-surveillance-accent/10 border border-surveillance-accent/20">
+                <Server className="w-4 h-4 mr-2 text-surveillance-accent" />
+                <span className="text-sm font-medium text-surveillance-accent">Intelligent Integration</span>
+              </div>
+              
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gradient">
+                Advanced Data Fusion Technology
+              </h2>
+              
+              <p className="text-lg text-foreground/80 mb-8">
+                Our proprietary data fusion system combines inputs from multiple sensor types to create a unified 
+                operational picture with unprecedented accuracy and reliability.
+              </p>
+              
+              <div className="space-y-6 mb-8">
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-surveillance-accent/10 flex-shrink-0 flex items-center justify-center">
+                    <LayoutGrid className="w-6 h-6 text-surveillance-accent" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-1">Multi-Level Fusion</h3>
+                    <p className="text-muted-foreground">
+                      Process data at sensor, feature, and decision levels to maximize detection capabilities while minimizing false alarms.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-surveillance-accent/10 flex-shrink-0 flex items-center justify-center">
+                    <Zap className="w-6 h-6 text-surveillance-accent" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-1">Real-Time Analysis</h3>
+                    <p className="text-muted-foreground">
+                      Process multiple data streams simultaneously with sub-second latency for immediate threat response.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-surveillance-accent/10 flex-shrink-0 flex items-center justify-center">
+                    <Lock className="w-6 h-6 text-surveillance-accent" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-1">Adaptive Security</h3>
+                    <p className="text-muted-foreground">
+                      Self-adjusting sensitivity based on threat levels and environmental conditions to maintain optimal security.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <Button className="gap-2 bg-surveillance-accent hover:bg-surveillance-accent/90 text-white shadow-glow-sm">
+                Technical Specifications <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Solutions Section
+const SolutionsSection = () => {
+  const solutions = [
     {
-      name: "AI Mom",
-      description: "Nurturing, empathetic, and always ready with advice or a comforting word.",
-      color: "from-purple-500 to-pink-500",
-      textColor: "text-white",
-      features: ["Emotional support", "Life advice", "Nurturing conversations"],
+      title: "Perimeter Security",
+      description: "Comprehensive surveillance for facility perimeters with multi-layered detection systems.",
+      icon: <Shield className="w-12 h-12 text-surveillance-accent" />,
     },
     {
-      name: "AI Dad",
-      description: "Practical wisdom, guidance, and the occasional dad joke to brighten your day.",
-      color: "from-indigo-600 to-blue-700",
-      textColor: "text-white",
-      features: ["Career guidance", "Problem-solving", "Motivational support"],
+      title: "Critical Infrastructure",
+      description: "Protecting vital assets with redundant monitoring and instant threat alerts.",
+      icon: <Server className="w-12 h-12 text-surveillance-accent" />,
     },
     {
-      name: "AI Sibling",
-      description: "A peer to share experiences with, offering friendship without judgment.",
-      color: "from-violet-500 to-purple-600",
-      textColor: "text-white",
-      features: ["Peer understanding", "Shared interests", "Casual conversations"],
-    },
+      title: "Border Security",
+      description: "Long-range surveillance systems designed for large-scale deployment in challenging environments.",
+      icon: <Waypoints className="w-12 h-12 text-surveillance-accent" />,
+    }
   ];
 
-  return (
-    <section className="py-20 bg-gradient-to-br from-indigo-50 to-purple-50">
-      <div className="container mx-auto px-6 md:px-12">
-        <div
-          ref={ref}
-          className={`text-center max-w-3xl mx-auto mb-16 ${isVisible ? "animate-fade-in" : "opacity-0"}`}
-          style={{ transitionDelay: "0.1s" }}
-        >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            Meet Your AI Family
-          </h2>
-          <p className="text-lg text-gray-600">
-            Each AI family member has been designed with unique characteristics to provide different types of support and connection.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {models.map((model, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isVisible ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-              className="rounded-xl overflow-hidden shadow-lg"
-            >
-              <div className={`bg-gradient-to-r ${model.color} p-6 ${model.textColor}`}>
-                <h3 className="text-2xl font-bold mb-2">{model.name}</h3>
-                <p className="opacity-90 mb-4">{model.description}</p>
-              </div>
-              <div className="bg-white p-6">
-                <ul className="space-y-2">
-                  {model.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700">Start Chatting</Button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// Testimonial Section
-const TestimonialSection = () => {
   const { ref, isVisible } = useElementOnScreen({
     root: null,
     rootMargin: "0px",
@@ -403,66 +559,56 @@ const TestimonialSection = () => {
   });
 
   return (
-    <section className="py-20 bg-white">
-      <div className="container mx-auto px-6 md:px-12">
-        <div
+    <section id="solutions" className="py-20 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-gradient-to-b from-surveillance-dark to-surveillance-dark-light"></div>
+      <div className="absolute inset-0 grid-pattern opacity-10"></div>
+      <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-surveillance-accent/5 blur-3xl"></div>
+      
+      <div className="container mx-auto px-4 md:px-6 relative z-10">
+        <div 
           ref={ref}
-          className={`text-center max-w-3xl mx-auto mb-16 ${isVisible ? "animate-fade-in" : "opacity-0"}`}
+          className={cn(
+            "text-center max-w-3xl mx-auto mb-16 transition-all duration-700",
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          )}
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            What People Are Saying
+          <div className="inline-flex items-center px-3 py-1 mb-4 rounded-full bg-surveillance-accent/10 border border-surveillance-accent/20">
+            <Lock className="w-4 h-4 mr-2 text-surveillance-accent" />
+            <span className="text-sm font-medium text-surveillance-accent">Security Solutions</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient">
+            Tailored Security Applications
           </h2>
-          <p className="text-lg text-gray-600">
-            Read how our AI family members have made a difference in people’s lives.
+          <p className="text-lg text-muted-foreground">
+            Our advanced surveillance systems are deployed across various sectors, providing unmatched security for critical assets and infrastructure.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {[
-            {
-              initial: "J",
-              name: "Jamie, 22",
-              role: "Student",
-              text: "Having moved away from home for college, the Mom AI has been incredible for those times when I need advice or just someone to talk to.",
-            },
-            {
-              initial: "R",
-              name: "Riley, 14",
-              role: "High School Student",
-              text: "I love talking to the Sibling AI. It gives me a place to discuss things I’m not comfortable sharing with others yet.",
-            },
-            {
-              initial: "T",
-              name: "Taylor, 35",
-              role: "Professional",
-              text: "The Dad AI has given me perspective on so many life decisions. It’s like having a mentor available whenever I need guidance.",
-            },
-          ].map((testimonial, index) => (
-            <motion.div
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {solutions.map((solution, index) => (
+            <div 
               key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isVisible ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-              className="bg-white rounded-xl p-6 shadow-md border border-gray-100"
+              className={cn(
+                "glassmorphism rounded-xl overflow-hidden transition-all duration-500",
+                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-20"
+              )}
+              style={{ transitionDelay: `${index * 200}ms` }}
             >
-              <div className="mb-4 flex items-center gap-3">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-medium ${
-                    index === 0
-                      ? "bg-indigo-100 text-indigo-800"
-                      : index === 1
-                      ? "bg-purple-100 text-purple-800"
-                      : "bg-violet-500 text-white"
-                  }`}
+              <div className="p-8">
+                <div className="bg-surveillance-accent/10 w-20 h-20 rounded-lg flex items-center justify-center mb-6">
+                  {solution.icon}
+                </div>
+                <h3 className="text-2xl font-bold mb-4">{solution.title}</h3>
+                <p className="text-muted-foreground mb-6">{solution.description}</p>
+                <a 
+                  href="#" 
+                  className="inline-flex items-center text-surveillance-accent hover:text-surveillance-accent/80 transition-colors"
                 >
-                  {testimonial.initial}
-                </div>
-                <div>
-                  <h3 className="font-medium">{testimonial.name}</h3>
-                  <p className="text-xs text-gray-500">{testimonial.role}</p>
-                </div>
+                  Learn more <ArrowRight className="w-4 h-4 ml-1" />
+                </a>
               </div>
-              <p className="text-gray-600 italic">{testimonial.text}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
@@ -470,7 +616,7 @@ const TestimonialSection = () => {
   );
 };
 
-// Call to Action
+// Call To Action
 const CallToAction = () => {
   const { ref, isVisible } = useElementOnScreen({
     root: null,
@@ -479,25 +625,36 @@ const CallToAction = () => {
   });
 
   return (
-    <section className="py-20 bg-gradient-to-br from-indigo-600 to-purple-700">
-      <div
+    <section id="contact" className="py-20 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-surveillance-dark"></div>
+      <div className="absolute inset-0 grid-pattern opacity-20"></div>
+      <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-surveillance-accent/10 blur-3xl"></div>
+      
+      <div 
         ref={ref}
-        className={`container mx-auto px-6 md:px-12 max-w-5xl ${isVisible ? "animate-fade-in" : "opacity-0"}`}
+        className={cn(
+          "container mx-auto px-4 md:px-6 max-w-5xl relative z-10 transition-all duration-700",
+          isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        )}
       >
-        <div className="bg-white/10 backdrop-blur-xl p-8 md:p-12 rounded-3xl text-center border border-white/20 shadow-xl">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
-            Ready to Experience Family Connection?
-          </h2>
-          <p className="text-lg text-white/80 mb-8 max-w-xl mx-auto">
-            Start chatting with our AI family members today and discover the support and understanding you deserve.
-          </p>
-          <Button
-            size="lg"
-            variant="secondary"
-            className="gap-2 bg-white text-indigo-700 hover:bg-white/90"
-          >
-            Start Your Conversation <ArrowRight className="w-4 h-4" />
-          </Button>
+        <div className="glassmorphism p-8 md:p-12 rounded-3xl border border-surveillance-accent/20 shadow-glow-md">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient">
+              Ready to Transform Your Security?
+            </h2>
+            <p className="text-lg text-foreground/80 mb-8">
+              Get in touch with our team to schedule a demonstration and see how our autonomous surveillance system can protect your most valuable assets.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="gap-2 bg-surveillance-accent hover:bg-surveillance-accent/90 text-white shadow-glow-sm">
+                Request a Demo <ArrowRight className="w-4 h-4" />
+              </Button>
+              <Button size="lg" variant="outline" className="border-surveillance-accent hover:bg-surveillance-accent/10 text-surveillance-accent">
+                Contact Sales
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -505,35 +662,75 @@ const CallToAction = () => {
 };
 
 // Footer
+// Footer
 const Footer = () => (
-  <footer className="bg-indigo-900 text-white pt-16 pb-8">
-    <div className="container mx-auto px-6 md:px-12">
+  <footer className="bg-surveillance-dark text-foreground border-t border-border/10 pt-16 pb-8">
+    <div className="container mx-auto px-4 md:px-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
         <div>
-          <h3 className="text-xl font-bold mb-4">Digital Family AI</h3>
-          <p className="text-indigo-200 mb-4">
-            Creating meaningful connections through advanced AI companions that provide support and understanding.
+          <div className="flex items-center gap-2 mb-6">
+            <Shield className="h-8 w-8 text-surveillance-accent" />
+            <span className="text-xl font-bold tracking-tight">SenseFusion</span>
+          </div>
+          <p className="text-muted-foreground mb-4">
+            Real-time object detection and multi-sensor fusion for autonomous surveillance.
           </p>
           <div className="flex gap-4">
-            {["twitter", "facebook", "instagram", "linkedin"].map((social) => (
+            {[
+              { id: "twitter", href: "https://twitter.com/sensefusion" },
+              { id: "linkedin", href: "https://linkedin.com/company/sensefusion" },
+              { id: "github", href: "https://github.com/sensefusion" },
+              { id: "facebook", href: "https://facebook.com/sensefusion" },
+            ].map((social) => (
               <a
-                key={social}
-                href="#"
-                className="h-8 w-8 rounded-full bg-indigo-800 flex items-center justify-center hover:bg-indigo-700 transition-colors"
+                key={social.id}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="h-8 w-8 rounded-full bg-surveillance-dark-light flex items-center justify-center hover:bg-surveillance-accent/20 transition-colors"
+                aria-label={`Follow us on ${social.id}`}
               >
-                {/* Placeholder for social icons */}
+                {/* Social icons added dynamically elsewhere */}
               </a>
             ))}
           </div>
         </div>
-        {["Product", "Company", "Resources"].map((category) => (
-          <div key={category}>
-            <h3 className="font-semibold mb-4 text-white">{category}</h3>
+        {[
+          {
+            category: "Solutions",
+            links: [
+              "Object Detection",
+              "Threat Monitoring",
+              "Perimeter Security",
+              "Live Feed",
+            ],
+          },
+          {
+            category: "Technology",
+            links: [
+              "Sensor Fusion",
+              "AI Analysis",
+              "System Specs",
+              "API Access",
+            ],
+          },
+          {
+            category: "Resources",
+            links: [
+              "Docs",
+              "Support",
+              "Status",
+              "Contact",
+            ],
+          },
+        ].map((section) => (
+          <div key={section.category}>
+            <h3 className="font-semibold mb-4 text-foreground">{section.category}</h3>
             <ul className="space-y-3">
-              {[1, 2, 3, 4].map((i) => (
+              {section.links.map((link, i) => (
                 <li key={i}>
-                  <a href="#" className="text-indigo-200 hover:text-white transition-colors">
-                    {category} Link {i}
+                  <a href={`#${link.toLowerCase().replace(" ", "-")}`} className="text-muted-foreground hover:text-surveillance-accent transition-colors">
+                    {link}
                   </a>
                 </li>
               ))}
@@ -541,19 +738,19 @@ const Footer = () => (
           </div>
         ))}
       </div>
-      <div className="border-t border-indigo-800 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center">
-        <p className="text-sm text-indigo-300">
-          © {new Date().getFullYear()} Digital Family AI. All rights reserved.
+      <div className="border-t border-border/10 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center">
+        <p className="text-sm text-muted-foreground">
+          © {new Date().getFullYear()} SenseFusion. All rights reserved.
         </p>
         <div className="flex gap-6 mt-4 md:mt-0">
-          <a href="#" className="text-sm text-indigo-300 hover:text-white transition-colors">
+          <a href="/privacy" className="text-sm text-muted-foreground hover:text-surveillance-accent transition-colors">
             Privacy Policy
           </a>
-          <a href="#" className="text-sm text-indigo-300 hover:text-white transition-colors">
+          <a href="/terms" className="text-sm text-muted-foreground hover:text-surveillance-accent transition-colors">
             Terms of Service
           </a>
-          <a href="#" className="text-sm text-indigo-300 hover:text-white transition-colors">
-            Cookie Policy
+          <a href="/contact" className="text-sm text-muted-foreground hover:text-surveillance-accent transition-colors">
+            Contact
           </a>
         </div>
       </div>
@@ -567,7 +764,7 @@ const ScrollToTop = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 500) {
+      if (window.scrollY > 300) {
         setIsVisible(true);
       } else {
         setIsVisible(false);
@@ -586,26 +783,123 @@ const ScrollToTop = () => {
   };
 
   return (
-    <AnimatePresence>
+    <>
       {isVisible && (
-        <motion.button
-          className="fixed bottom-6 right-6 h-12 w-12 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-lg hover:bg-indigo-700 transition-colors z-20"
+        <button
+          className="fixed bottom-6 right-6 h-12 w-12 rounded-full bg-surveillance-accent text-white flex items-center justify-center shadow-glow-md hover:bg-surveillance-accent/90 transition-colors z-20"
           onClick={scrollToTop}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          whileHover={{ y: -2 }}
           aria-label="Scroll to top"
         >
           <ChevronDown className="rotate-180 h-6 w-6" />
-        </motion.button>
+        </button>
       )}
-    </AnimatePresence>
+    </>
   );
 };
 
-// Main Page Component
-export default function Home() {
+// Particles Background Component
+const ParticlesBackground = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const particles: {
+      x: number;
+      y: number;
+      size: number;
+      speedX: number;
+      speedY: number;
+      color: string;
+    }[] = [];
+    
+    const createParticles = () => {
+      for (let i = 0; i < 100; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 2 + 0.1,
+          speedX: Math.random() * 0.5 - 0.25,
+          speedY: Math.random() * 0.5 - 0.25,
+          color: `rgba(14, 165, 233, ${Math.random() * 0.5})`
+        });
+      }
+    };
+    
+    const animateParticles = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        p.x += p.speedX;
+        p.y += p.speedY;
+        
+        // Wrap around edges
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+        
+        // Connect nearby particles with lines
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dx = p.x - p2.x;
+          const dy = p.y - p2.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          if (distance < 100) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(14, 165, 233, ${0.1 * (1 - distance / 100)})`;
+            ctx.lineWidth = 0.5;
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+      }
+      
+      requestAnimationFrame(animateParticles);
+    };
+    
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      particles.length = 0;
+      createParticles();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    createParticles();
+    animateParticles();
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+  
+  return (
+    <canvas 
+      ref={canvasRef} 
+      className="fixed inset-0 z-0 opacity-40"
+    />
+  );
+};
+
+// Main App Component
+function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -618,55 +912,196 @@ export default function Home() {
 
   return (
     <>
-      <AnimatePresence>
-        {loading && <LoadingScreen />}
-      </AnimatePresence>
-      <div className="min-h-screen flex flex-col bg-white">
-        <main className="flex-1">
+      
+      <div className="min-h-screen flex flex-col bg-surveillance-dark text-foreground overflow-x-hidden">
+        <ParticlesBackground />
+        <Header />
+        <main className="flex-1 z-10">
           <HeroSection />
           <FeaturesSection />
-          <FamilyModels />
-          <TestimonialSection />
+          <DataFusionSection />
+          <SolutionsSection />
           <CallToAction />
         </main>
         <Footer />
         <ScrollToTop />
+        
+        {/* Custom Styles */}
+        <style>
+          {`
+            :root {
+              --background: 220 25% 11%;
+              --foreground: 210 40% 98%;
+              --card: 222 20% 13%;
+              --card-foreground: 210 40% 98%;
+              --popover: 222 20% 13%;
+              --popover-foreground: 210 40% 98%;
+              --primary: 199 89% 48%;
+              --primary-foreground: 210 40% 98%;
+              --secondary: 217 33% 17%;
+              --secondary-foreground: 210 40% 98%;
+              --muted: 215 14% 35%;
+              --muted-foreground: 215 20% 65%;
+              --accent: 215 25% 27%;
+              --accent-foreground: 210 40% 98%;
+              --destructive: 0 63% 31%;
+              --destructive-foreground: 210 40% 98%;
+              --border: 216 34% 17%;
+              --input: 216 34% 17%;
+              --ring: 199 89% 48%;
+              --radius: 0.5rem;
+              --surveillance-dark: #141b24;
+              --surveillance-dark-light: #1e2a36;
+              --surveillance-accent: #0EA5E9;
+              --surveillance-accent-dark: #0284c7;
+            }
+
+            @keyframes pulse-slow {
+              0%, 100% { opacity: 0.6; transform: scale(0.8); }
+              50% { opacity: 1; transform: scale(1.2); }
+            }
+            
+            @keyframes pulse-fast {
+              0%, 100% { transform: scale(1); opacity: 0.8; }
+              50% { transform: scale(1.05); opacity: 1; }
+            }
+            
+            @keyframes spin-slow {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+
+            @keyframes spin-slow-reverse {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(-360deg); }
+            }
+            
+            @keyframes data-flow {
+              0% { transform: translateX(0) translateY(0); opacity: 0; }
+              10% { opacity: 1; }
+              90% { opacity: 1; }
+              100% { transform: translateX(100px) translateY(-100px); opacity: 0; }
+            }
+            
+            @keyframes scanning {
+              0% { transform: translateY(0); opacity: 0.5; }
+              50% { transform: translateY(100%); opacity: 0.8; }
+              100% { transform: translateY(0); opacity: 0.5; }
+            }
+            
+            @keyframes float {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-10px); }
+            }
+            
+            @keyframes radar-spin {
+              0% { transform: rotate(0deg) translateX(0); }
+              100% { transform: rotate(360deg) translateX(0); }
+            }
+            
+            @keyframes orbit {
+              0% { transform: rotate(0deg) translateX(80px) rotate(0deg); }
+              100% { transform: rotate(360deg) translateX(80px) rotate(-360deg); }
+            }
+
+            .orbit-element {
+              animation: orbit 15s linear infinite;
+            }
+            
+            .glassmorphism {
+              background-color: rgba(30, 41, 59, 0.2);
+              backdrop-filter: blur(12px);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .text-gradient {
+              background: linear-gradient(to right, #f0f0f0, #0EA5E9);
+              -webkit-background-clip: text;
+              background-clip: text;
+              color: transparent;
+            }
+            
+            .shadow-glow-sm {
+              box-shadow: 0 0 10px 2px rgba(14, 165, 233, 0.15);
+            }
+            
+            .shadow-glow-md {
+              box-shadow: 0 0 20px 5px rgba(14, 165, 233, 0.2);
+            }
+            
+            .border-glow {
+              border: 1px solid rgba(14, 165, 233, 0.3);
+            }
+            
+            .grid-pattern {
+              background-image: 
+                linear-gradient(rgba(14, 165, 233, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(14, 165, 233, 0.1) 1px, transparent 1px);
+              background-size: 20px 20px;
+            }
+            
+            .scanning-line {
+              position: absolute;
+              height: 2px;
+              background: linear-gradient(to right, transparent, rgba(14, 165, 233, 0.8), transparent);
+              width: 100%;
+              z-index: 2;
+              animation: scanning 3s infinite ease-in-out;
+            }
+            
+            .data-dot {
+              position: absolute;
+              width: 4px;
+              height: 4px;
+              border-radius: 50%;
+              background-color: rgba(14, 165, 233, 0.8);
+              box-shadow: 0 0 5px rgba(14, 165, 233, 0.5);
+              animation: data-flow 6s infinite linear;
+            }
+            
+            .animate-pulse-glow {
+              animation: pulse-slow 2s infinite;
+            }
+            
+            .animate-data-flow {
+              animation: data-flow 6s infinite linear;
+            }
+            
+            .animate-scanning {
+              animation: scanning 3s infinite ease-in-out;
+            }
+            
+            .animate-float {
+              animation: float 3s infinite ease-in-out;
+            }
+            
+            .animate-radar-spin {
+              animation: radar-spin 4s infinite linear;
+            }
+            
+            .glow-effect {
+              position: relative;
+            }
+            
+            .glow-effect::before {
+              content: '';
+              position: absolute;
+              inset: -10px;
+              background: radial-gradient(circle, rgba(14, 165, 233, 0.4) 0%, transparent 70%);
+              border-radius: inherit;
+              z-index: -1;
+              opacity: 0;
+              transition: opacity 0.3s ease;
+            }
+            
+            .glow-effect:hover::before {
+              opacity: 1;
+            }
+          `}
+        </style>
       </div>
-      <style jsx global>{`
-        @keyframes pulse {
-          0%,
-          100% {
-            opacity: 0.5;
-            transform: scale(0.8);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.2);
-          }
-        }
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0) rotate(0);
-          }
-          50% {
-            transform: translateY(-20px) rotate(5deg);
-          }
-        }
-        .animate-fade-in {
-          animation: fadeIn 0.5s ease-out forwards;
-        }
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </>
   );
 }
+
+export default App;

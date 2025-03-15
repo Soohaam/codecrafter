@@ -19,7 +19,7 @@ const Navbar = () => {
             href="/"
             className="text-2xl font-bold text-white tracking-tight hover:text-indigo-200 transition-colors duration-200"
           >
-            Family Connect
+            Fiber Vision
           </Link>
 
           {/* Desktop Menu */}

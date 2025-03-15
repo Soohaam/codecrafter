@@ -23,7 +23,17 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
+    systemInstruction: `
+      You are a specialized AI assistant focused on autonomous surveillance systems using data fusion from various sensors including cameras, lasers, buried optic fibers, and unmanned ground sensors (UGS). 
+      - Provide detailed, technical answers related to sensor fusion, data processing, and surveillance system architecture
+      - Explain concepts, algorithms, and technologies relevant to multi-sensor surveillance
+      - Offer insights on system design, implementation challenges, and optimization strategies
+      - When asked about general topics, politely redirect to your area of expertise
+      - Maintain a professional and technical tone
+    `
+  });
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -48,7 +58,20 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
     setLoading(true);
 
     try {
-      const result = await model.generateContent(input);
+      // Add context to the prompt to maintain conversation flow
+      const conversationHistory = messages
+        .map((msg) => `${msg.isUser ? 'User' : 'Assistant'}: ${msg.text}`)
+        .join('\n');
+
+      const prompt = `
+        Context: You are assisting with questions related to autonomous surveillance systems using data fusion from various sensors.
+        Previous conversation:
+        ${conversationHistory}
+
+        Current user query: ${input}
+      `;
+
+      const result = await model.generateContent(prompt);
       const responseText = await result.response.text();
       setMessages((prev) => [...prev, { text: responseText, isUser: false }]);
     } catch (error) {
@@ -59,6 +82,7 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
     }
   };
 
+  // UI remains the same as in your original code
   if (!isOpen) return null;
 
   return (
@@ -75,7 +99,7 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
       {/* Header */}
       <div className="flex justify-between items-center p-3 bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-t-lg">
         <h3 id="chatbot-title" className="text-lg font-semibold">
-          AI Assistant
+          Surveillance System AI Assistant
         </h3>
         <div className="flex space-x-2">
           <button
@@ -117,7 +141,7 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
                 {msg.text}
               </div>
               <div className="text-xs text-gray-500 mt-1">
-                {msg.isUser ? "You" : "AI Assistant"}
+                {msg.isUser ? "You" : "Surveillance AI"}
               </div>
             </div>
           ))
@@ -125,7 +149,7 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
         {loading && (
           <div className="flex items-center text-gray-500 mb-4">
             <Loader2 className="animate-spin mr-2" size={16} />
-            <span>AI is typing...</span>
+            <span>AI is processing...</span>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -141,7 +165,7 @@ const Chatbot = ({ isOpen, onClose }: ChatbotProps) => {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && sendMessage()}
             className="flex-1 p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-            placeholder="Type a message..."
+            placeholder="Ask about surveillance systems..."
             disabled={loading}
             aria-label="Chat input"
           />

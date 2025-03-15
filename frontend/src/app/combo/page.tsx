@@ -32,8 +32,8 @@ export default function CombinedFeatures() {
         }
       }
 
-      setInitProgress(100);
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Longer pause at 100% for a more realistic feel
+      setInitProgress(10);
+      await new Promise(resolve => setTimeout(resolve, 15)); // Longer pause at 100% for a more realistic feel
       setInitializationStep('ready');
     };
 
@@ -110,20 +110,7 @@ export default function CombinedFeatures() {
     );
   };
 
-  const renderDescription = () => {
-    const descriptions: Record<ViewType, string> = {
-      objectDetection: "Live feed from our advanced object detection system. Watch as objects are identified and tracked in real-time.",
-      thermalView: "Real-time thermal imaging feed. Observe heat signatures and temperature variations across the monitored area.",
-      activityDetection: "Intelligent activity monitoring system. Analyzing and identifying various human activities in the scene.",
-      weaponDetection: "Advanced weapon detection feed. Instantly identifying and alerting potential threats for enhanced security."
-    };
-
-    return (
-      <p className="text-gray-300 text-lg">
-        {descriptions[activeView]}
-      </p>
-    );
-  };
+ 
 
   const renderLoadingScreen = () => {
     const messages: Partial<Record<InitStep, string>> = {
@@ -176,9 +163,7 @@ export default function CombinedFeatures() {
           </div>
           {renderActiveView()}
         </div>
-        <div className="bg-gray-800 shadow-lg rounded-lg p-6">
-          {renderDescription()}
-        </div>
+        
       </div>
     </div>
   );
