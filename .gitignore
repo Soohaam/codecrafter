@@ -35,7 +35,6 @@ coco.names
 *.data
 *.cfg
 *.csv
-*.json
 *.xml
 *.yaml
 *.yml
