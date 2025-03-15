@@ -96,9 +96,8 @@ docs/build/
 *~
 
 # Media and output files
-*.jpg
+
 *.jpeg
-*.png
 *.mp4
 *.avi
 *.mov
