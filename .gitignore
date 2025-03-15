@@ -3,6 +3,7 @@ venv/
 *.pyd
 *.lib
 
+virtualenv
 node_modules/
 backend/.env
 # Python-related

@@ -75,21 +75,7 @@ const useElementOnScreen = (options: IntersectionObserverInit) => {
   return { ref: setRef, isVisible };
 };
 
-// Header Component
-const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-
-};
 
 
 
@@ -915,7 +901,7 @@ function App() {
       
       <div className="min-h-screen flex flex-col bg-surveillance-dark text-foreground overflow-x-hidden">
         <ParticlesBackground />
-        <Header />
+      
         <main className="flex-1 z-10">
           <HeroSection />
           <FeaturesSection />
