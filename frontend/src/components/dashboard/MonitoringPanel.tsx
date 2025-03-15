@@ -217,7 +217,7 @@ const MonitoringPanel = ({
         )}
         {hasError ? (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
-            <p className="text-red-500 font-semibold">Error loading feed. Please check the camera source.</p>
+            <p className="text-red-100 font-semibold">Error loading feed. Please check the camera source.</p>
           </div>
         ) : (
           <img

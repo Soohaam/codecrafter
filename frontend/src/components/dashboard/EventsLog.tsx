@@ -1,3 +1,4 @@
+// src/components/dashboard/EventsLog.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -16,7 +17,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { EventType, SecurityEvent } from '@/types/security';
 import io from 'socket.io-client';
 
-// Initialize socket connection
 const socket = io('http://localhost:5000', {
   transports: ['websocket', 'polling'],
   reconnection: true,
@@ -29,8 +29,8 @@ interface EventsLogProps {
   events: SecurityEvent[];
   onExport: (format: 'csv' | 'json') => void;
   className?: string;
-  onPersonDetected?: (personEvent: SecurityEvent) => void; // Add callback for person detection
-  onAuthorizationUpdate?: (eventId: string, status: 'AUTHORIZED' | 'UNAUTHORIZED') => void; // Add callback for authorization updates
+  onPersonDetected?: (personEvent: SecurityEvent) => void;
+  onAuthorizationUpdate?: (eventId: string, status: 'AUTHORIZED' | 'UNAUTHORIZED') => void;
 }
 
 const EventsLog = ({ 
@@ -59,7 +59,6 @@ const EventsLog = ({
       console.log('Connected to server');
     });
 
-    // Listen for object detection events
     socket.on('object_detection', (data: SecurityEvent) => {
       setEvents(prevEvents => {
         const objectName = data.object_name || data.message || '';
@@ -67,7 +66,6 @@ const EventsLog = ({
           return prevEvents;
         }
 
-        // Check if it's a person detection
         const isPerson = objectName.toLowerCase() === 'person';
         const newEvent: SecurityEvent = {
           ...data,
@@ -78,7 +76,6 @@ const EventsLog = ({
 
         setLoggedObjectNames(prev => new Set(prev).add(objectName));
 
-        // Notify parent component if person is detected
         if (isPerson && onPersonDetected) {
           onPersonDetected(newEvent);
         }
@@ -87,12 +84,15 @@ const EventsLog = ({
       });
     });
 
-    // Listen for authorization updates
     socket.on('authorization_update', (data: { eventId: string; status: 'AUTHORIZED' | 'UNAUTHORIZED' }) => {
       setEvents(prevEvents => {
         const updatedEvents = prevEvents.map(event => 
           event.id === data.eventId 
-            ? { ...event, authorizationStatus: data.status, type: data.status === 'UNAUTHORIZED' ? EventType.ALERT : EventType.INFO }
+            ? { 
+                ...event, 
+                authorizationStatus: data.status, 
+                type: data.status === 'UNAUTHORIZED' ? EventType.ALERT : EventType.INFO 
+              }
             : event
         );
         if (onAuthorizationUpdate) {
