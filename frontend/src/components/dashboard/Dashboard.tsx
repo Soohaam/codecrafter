@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 import MonitoringPanel from './MonitoringPanel';
 import EventsLog from './EventsLog';
 import StatusBar from './StatusBar';
+import Frequency from './Frequency'; // Import the new Frequency component
 import { EventType, SecurityEvent } from '@/types/security';
 
 const MapView = dynamic(() => import('./MapView'), { ssr: false });
@@ -23,6 +24,7 @@ const Dashboard = () => {
   const [rangeSize, setRangeSize] = useState(300); // meters
   const [selectedCamera, setSelectedCamera] = useState('cam-south');
   const [currentPersonEventId, setCurrentPersonEventId] = useState<string | null>(null);
+  const [frequencyActive, setFrequencyActive] = useState(false); // State for frequency fluctuation
 
   useEffect(() => {
     setEvents([
@@ -86,7 +88,6 @@ const Dashboard = () => {
   const handlePersonDetected = (personEvent: SecurityEvent) => {
     setCurrentPersonEventId(personEvent.id);
     
-    // Add person detection event with pending status
     const existingPerson = events.find(e => 
       e.object_name === 'person' && 
       e.authorizationStatus === 'PENDING' && 
@@ -124,7 +125,6 @@ const Dashboard = () => {
       return updatedEvents;
     });
 
-    // Clear current person event after authorization
     if (currentPersonEventId === eventId) {
       setCurrentPersonEventId(null);
     }
@@ -173,6 +173,17 @@ const Dashboard = () => {
     document.body.removeChild(link);
   };
 
+  const handleCircleClick = () => {
+    setFrequencyActive(true);
+    addEvent({
+      type: EventType.INFO,
+      message: 'Fiber optic disturbance detected',
+      details: 'Frequency fluctuation initiated from main camera range',
+    });
+    // Reset frequency after 5 seconds
+    setTimeout(() => setFrequencyActive(false), 5000);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-black p-4 sm:p-6">
       <StatusBar 
@@ -183,6 +194,7 @@ const Dashboard = () => {
       />
       
       <div className="grid grid-cols-1 gap-6 mt-6">
+        {/* Map View */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -215,15 +227,29 @@ const Dashboard = () => {
                 rangeSize={rangeSize}
                 laserActive={laserActive}
                 laserBreach={laserBreach}
+                onCircleClick={handleCircleClick} // Pass the circle click handler
               />
             </div>
           </div>
         </motion.div>
 
+        {/* Frequency Component */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <div className="dash-card p-4">
+            <h2 className="text-xl font-semibold mb-4">Fiber Optic Frequency</h2>
+            <Frequency isActive={frequencyActive} />
+          </div>
+        </motion.div>
+
+        {/* Monitoring Panel and Events Log */}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
         >
           <ResizablePanelGroup
             direction="horizontal"
@@ -253,10 +279,11 @@ const Dashboard = () => {
           </ResizablePanelGroup>
         </motion.div>
 
+        {/* System Configuration */}
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
           className="dash-card p-4"
         >
           <div className="flex justify-between items-center mb-4">
