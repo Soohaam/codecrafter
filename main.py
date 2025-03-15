@@ -1,4 +1,7 @@
-import cv2
+import cv2 
+
+print(cv2.__version__)
+
 import cvzone
 import mediapipe as mp
 from ultralytics import YOLO
@@ -13,7 +16,7 @@ app = Flask(__name__)
 cap = cv2.VideoCapture(0)
 cap.set(3, 740)  # Width
 cap.set(4, 480)  # Height
-
+cap.set(5, 30)
 # Load COCO classes for general object detection
 classNames = []
 classFile = 'coco.names'
@@ -162,28 +165,190 @@ def detect_weapons(frame):
     except Exception as e:
         print(f"Error in weapon detection: {e}")
         return frame
-
+    
 def generate_activity_frames():
-    """Generate frames with pose and weapon detection."""
-    while True:
-        with lock:
-            if global_frame is None:
-                continue
-            frame = global_frame.copy()
+    """Advanced motion detection including: Running, Walking, Sitting, etc."""
+    # Activity tracking variables
+    prev_center = None
+    activity = "Initializing..."
+    activity_history = []  # Store recent activities for smoothing
+    displacement_history = []  # Store recent displacements for better classification
 
-        # Weapon detection using YOLOv8
-        frame = detect_weapons(frame)
+    # Performance optimization
+    process_every_n_frames = 1  # Process every frame for 60 FPS
+    frame_count = 0
 
-        # Mediapipe Pose detection
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = pose.process(frame_rgb)
+    # Create a dedicated pose instance with optimized settings
+    with mp_pose.Pose(
+        model_complexity=0,  # Light complexity for faster processing
+        min_detection_confidence=0.5,
+        min_tracking_confidence=0.5,
+        smooth_landmarks=True  # Enable temporal filtering
+    ) as pose_detector:
 
-        if results.pose_landmarks:
-            mp_drawing.draw_landmarks(frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+        while True:
+            # Safely access the global frame
+            with lock:
+                if global_frame is None:
+                    continue
+                frame = global_frame.copy()
 
-        _, buffer = cv2.imencode('.jpg', frame)
-        frame = buffer.tobytes()
-        yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            # Process every frame for performance
+            frame_count += 1
+            if frame_count % process_every_n_frames != 0:
+                # Still do weapon detection on every frame
+                frame = detect_weapons(frame)
+
+            # Draw the previous activity state
+            cv2.putText(frame, f"Activity: {activity}", (10, 40),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1,
+                        (0, 255, 0) if activity != "No pose detected" else (0, 0, 255), 2)
+
+            # Add status indicator
+            cv2.putText(frame, "Monitoring Active", (10, frame.shape[0] - 20),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+
+            # _, buffer = cv2.imencode(".jpg", frame)
+            # yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+            # continue
+
+            # Process full frame for weapon detection
+            frame = detect_weapons(frame)
+
+            # Pre-process frame for pose detection - resize for better performance
+            # Use a better scaling factor for improved balance between speed and accuracy
+            scale_factor = 0.5
+            small_frame = cv2.resize(frame, (0, 0), fx=scale_factor, fy=scale_factor)
+
+            # Convert to RGB (MediaPipe requirement)
+            rgb_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
+
+            # Get pose landmarks
+            results = pose_detector.process(rgb_frame)
+
+            # Valid pose detection
+            if results.pose_landmarks:
+                landmarks = results.pose_landmarks.landmark
+
+                # Calculate centroid with visibility filter
+                visible_landmarks = []
+                for lm in landmarks:
+                    if lm.visibility > 0.5:  # Improved visibility threshold
+                        visible_landmarks.append((lm.x, lm.y))
+
+                if len(visible_landmarks) >= 10:  # Need good visibility
+                    # Calculate centroid
+                    current_center = (
+                        sum(p[0] for p in visible_landmarks) / len(visible_landmarks),
+                        sum(p[1] for p in visible_landmarks) / len(visible_landmarks)
+                    )
+
+                    # Get specific landmarks for posture analysis
+                    try:
+                        left_hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
+                        right_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value]
+                        left_knee = landmarks[mp_pose.PoseLandmark.LEFT_KNEE.value]
+                        right_knee = landmarks[mp_pose.PoseLandmark.RIGHT_KNEE.value]
+                        left_ankle = landmarks[mp_pose.PoseLandmark.LEFT_ANKLE.value]
+                        right_ankle = landmarks[mp_pose.PoseLandmark.RIGHT_ANKLE.value]
+                        left_shoulder = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value]
+                        right_shoulder = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value]
+
+                        # Calculate body angles and vectors for better classification
+                        hip_avg_y = (left_hip.y + right_hip.y) / 2
+                        knee_avg_y = (left_knee.y + right_knee.y) / 2
+                        ankle_avg_y = (left_ankle.y + right_ankle.y) / 2
+                        shoulder_avg_y = (left_shoulder.y + right_shoulder.y) / 2
+
+                        # Body tilt (vertical alignment)
+                        body_vertical = hip_avg_y - shoulder_avg_y
+
+                        if prev_center is not None:
+                            # Calculate displacement (movement amount)
+                            dx = current_center[0] - prev_center[0]
+                            dy = current_center[1] - prev_center[1]
+                            displacement = (dx**2 + dy**2)**0.5
+
+                            # Store in history for smoother detection
+                            displacement_history.append(displacement)
+                            if len(displacement_history) > 5:
+                                displacement_history.pop(0)
+
+                            # Get average displacement for stability
+                            avg_displacement = sum(displacement_history) / len(displacement_history)
+
+                            # Enhanced posture detection
+                            # Sitting: hips are lower than knees (y increases downwards)
+                            sitting_score = (hip_avg_y - knee_avg_y)
+
+                            # Crouching: knees are significantly bent
+                            knee_bend = knee_avg_y - ankle_avg_y
+
+                            # Activity classification with improved thresholds
+                            if sitting_score > 0.05:  # Sitting
+                                new_activity = "Sitting"
+                            elif knee_bend > 0.15:  # Crouching
+                                new_activity = "Crouching"
+                            elif avg_displacement > 0.07:  # Running (faster movement)
+                                new_activity = "Running"
+                            elif 0.02 < avg_displacement < 0.07:  # Walking (moderate movement)
+                                new_activity = "Walking"
+                            elif abs(dy) > 0.06 and abs(dx) < 0.04:  # Jumping (vertical movement)
+                                new_activity = "Jumping"
+                            elif body_vertical < -0.05:  # Bending forward
+                                new_activity = "Bending"
+                            else:
+                                new_activity = "Standing"
+                        else:
+                            new_activity = "Standing"
+
+                        # Add to activity history for smoothing
+                        activity_history.append(new_activity)
+                        if len(activity_history) > 3:  # Keep last 3 activities
+                            activity_history.pop(0)
+
+                        # Get most common recent activity (temporal smoothing)
+                        from collections import Counter
+                        activity = Counter(activity_history).most_common(1)[0][0]
+
+                        # Update previous center
+                        prev_center = current_center
+
+                    except Exception as e:
+                        # Fallback if specific landmark access fails
+                        activity = "Standing"
+                        print(f"Error in pose analysis: {e}")
+                else:
+                    activity = "Limited Visibility"
+                    prev_center = None
+            else:
+                activity = "No Pose Detected"
+                prev_center = None
+
+            # Draw skeleton on original frame if landmarks exist
+            if results.pose_landmarks:
+                # Draw the skeleton with correct coordinate transformation
+                mp_drawing.draw_landmarks(
+                    frame,
+                    results.pose_landmarks,
+                    mp_pose.POSE_CONNECTIONS,
+                    landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2),
+                    connection_drawing_spec=mp_drawing.DrawingSpec(color=(0, 255, 0), thickness=2)
+                )
+
+            # Display activity
+            cv2.putText(frame, f"Activity: {activity}", (10, 40),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1,
+                        (0, 255, 0) if "No" not in activity else (0, 0, 255), 2)
+
+            # Add status indicator
+            cv2.putText(frame, "Monitoring Active", (10, frame.shape[0] - 20),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+
+            # Encode and yield the frame
+            _, buffer = cv2.imencode(".jpg", frame)
+            yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+
 
 def generate_weapon_frames():
     """Generate frames with weapon detection only."""
