@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+fastapi-cors
+
+flask
+opencv-python
+opencv-contrib-python
+cvzone
+mediapipe
+ultralytics
+numpy
+# threading

@@ -1,0 +1,123 @@
+venv/
+*.dll
+*.pyd
+*.lib
+
+node_modules/
+backend/.env
+# Python-related
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.venv/
+
+# Model files and weights
+*.pb
+*.pbtxt
+*.pt
+*.pth
+*.weights
+*.onnx
+*.tflite
+frozen_inference_graph.pb
+ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt
+yolov8m.pt
+
+# Data files
+coco.names
+*.data
+*.cfg
+*.csv
+*.json
+*.xml
+*.yaml
+*.yml
+
+# Virtual environment
+*.venv
+venv/
+ENV/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-*
+*.code-workspace
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Cache files
+*.cache
+.cache/
+*.egg-info/
+*.eggs/
+pip-wheel-metadata/
+
+# Testing and coverage
+.coverage
+coverage.xml
+*.cover
+*.py,cover
+htmlcov/
+.tox/
+.nox/
+coverage/
+*.lcov
+
+# Build and distribution
+build/
+dist/
+*.egg
+*.egg-info/
+*.whl
+
+# Documentation
+docs/_build/
+docs/build/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*~
+
+# Media and output files
+*.jpg
+*.jpeg
+*.png
+*.mp4
+*.avi
+*.mov
+output/
+media/
+frames/
+recordings/
+
+# Configuration files that might contain sensitive information
+.env
+*.env
+*.env.*
+config.ini
+secrets.yaml
+credentials.json
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# macOS-specific
+*.icloud
