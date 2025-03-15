@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from "@/components/ui/card";
 import { 
@@ -14,18 +14,107 @@ import {
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { EventType, SecurityEvent } from '@/types/security';
+import io from 'socket.io-client';
+
+// Initialize socket connection
+const socket = io('http://localhost:5000', {
+  transports: ['websocket', 'polling'],
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+  withCredentials: true,
+});
 
 interface EventsLogProps {
   events: SecurityEvent[];
   onExport: (format: 'csv' | 'json') => void;
   className?: string;
+  onPersonDetected?: (personEvent: SecurityEvent) => void; // Add callback for person detection
+  onAuthorizationUpdate?: (eventId: string, status: 'AUTHORIZED' | 'UNAUTHORIZED') => void; // Add callback for authorization updates
 }
 
-const EventsLog = ({ events, onExport, className = '' }: EventsLogProps) => {
+const EventsLog = ({ 
+  events: initialEvents, 
+  onExport, 
+  className = '', 
+  onPersonDetected,
+  onAuthorizationUpdate
+}: EventsLogProps) => {
+  const [events, setEvents] = useState<SecurityEvent[]>(initialEvents);
   const [expanded, setExpanded] = useState(false);
+  const [loggedObjectNames, setLoggedObjectNames] = useState<Set<string>>(new Set());
+  const MAX_LOGS = 8;
 
-  const formatTimestamp = (timestamp: number) => {
-    const date = new Date(timestamp);
+  useEffect(() => {
+    socket.on('connect_error', (error) => {
+      console.error('Connection error:', error);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from server. Attempting to reconnect...');
+      setLoggedObjectNames(new Set());
+    });
+
+    socket.on('connect', () => {
+      console.log('Connected to server');
+    });
+
+    // Listen for object detection events
+    socket.on('object_detection', (data: SecurityEvent) => {
+      setEvents(prevEvents => {
+        const objectName = data.object_name || data.message || '';
+        if (loggedObjectNames.has(objectName)) {
+          return prevEvents;
+        }
+
+        // Check if it's a person detection
+        const isPerson = objectName.toLowerCase() === 'person';
+        const newEvent: SecurityEvent = {
+          ...data,
+          id: data.id || `${Date.now()}-${Math.random()}`,
+          isPerson,
+          authorizationStatus: isPerson ? 'PENDING' : undefined,
+        };
+
+        setLoggedObjectNames(prev => new Set(prev).add(objectName));
+
+        // Notify parent component if person is detected
+        if (isPerson && onPersonDetected) {
+          onPersonDetected(newEvent);
+        }
+
+        return [newEvent, ...prevEvents].slice(0, MAX_LOGS);
+      });
+    });
+
+    // Listen for authorization updates
+    socket.on('authorization_update', (data: { eventId: string; status: 'AUTHORIZED' | 'UNAUTHORIZED' }) => {
+      setEvents(prevEvents => {
+        const updatedEvents = prevEvents.map(event => 
+          event.id === data.eventId 
+            ? { ...event, authorizationStatus: data.status, type: data.status === 'UNAUTHORIZED' ? EventType.ALERT : EventType.INFO }
+            : event
+        );
+        if (onAuthorizationUpdate) {
+          onAuthorizationUpdate(data.eventId, data.status);
+        }
+        return updatedEvents;
+      });
+    });
+
+    return () => {
+      socket.off('object_detection');
+      socket.off('authorization_update');
+      socket.off('connect_error');
+      socket.off('disconnect');
+      socket.off('connect');
+    };
+  }, [loggedObjectNames, onPersonDetected, onAuthorizationUpdate]);
+
+  const formatTimestamp = (timestamp: string | number) => {
+    const date = typeof timestamp === 'string' 
+      ? new Date(timestamp)
+      : new Date(timestamp);
     return date.toLocaleTimeString('en-US', { 
       hour: '2-digit', 
       minute: '2-digit', 
@@ -109,12 +198,22 @@ const EventsLog = ({ events, onExport, className = '' }: EventsLogProps) => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between">
-                  <div className="font-medium truncate">{event.message}</div>
+                  <div className="font-medium truncate">
+                    {event.object_name || event.message}
+                    {event.authorizationStatus === 'AUTHORIZED' && ' (Authorized)'}
+                    {event.authorizationStatus === 'UNAUTHORIZED' && ' (Threat)'}
+                  </div>
                   <div className={`ml-2 text-xs px-1.5 py-0.5 rounded-md ${getEventTypeClass(event.type)}`}>
                     {event.type}
                   </div>
                 </div>
-                <div className="text-xs text-gray-500 mt-1">{event.details}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {event.authorizationStatus 
+                    ? `Status: ${event.authorizationStatus}`
+                    : event.confidence 
+                      ? `Accuracy: ${(event.confidence * 100).toFixed(1)}%`
+                      : event.details}
+                </div>
                 <div className="text-xs text-gray-400 mt-1">
                   {formatTimestamp(event.timestamp)}
                 </div>

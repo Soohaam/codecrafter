@@ -1,16 +1,18 @@
+// src/components/dashboard/Dashboard.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import MapView from './MapView';
+import dynamic from 'next/dynamic';
 import MonitoringPanel from './MonitoringPanel';
 import EventsLog from './EventsLog';
 import StatusBar from './StatusBar';
 import { EventType, SecurityEvent } from '@/types/security';
 
-// Mock headquarters location
+const MapView = dynamic(() => import('./MapView'), { ssr: false });
+
 const HQ_LOCATION = { lat: 37.7749, lng: -122.4194 }; // San Francisco
 
 const Dashboard = () => {
@@ -20,8 +22,8 @@ const Dashboard = () => {
   const [events, setEvents] = useState<SecurityEvent[]>([]);
   const [rangeSize, setRangeSize] = useState(300); // meters
   const [selectedCamera, setSelectedCamera] = useState('cam-south');
+  const [currentPersonEventId, setCurrentPersonEventId] = useState<string | null>(null);
 
-  // Initial events
   useEffect(() => {
     setEvents([
       {
@@ -43,14 +45,12 @@ const Dashboard = () => {
 
   const handleLaserToggle = () => {
     if (laserActive) {
-      // If turning off laser, log the event
       addEvent({
         type: EventType.WARNING,
         message: 'Laser system deactivated',
         details: 'Manual deactivation by operator',
       });
     } else {
-      // If turning on laser, log the event
       addEvent({
         type: EventType.INFO,
         message: 'Laser system activated',
@@ -63,23 +63,11 @@ const Dashboard = () => {
   const simulateLaserBreach = () => {
     if (!laserBreach && laserActive) {
       setLaserBreach(true);
-      
-      // Add breach event
       addEvent({
         type: EventType.ALERT,
         message: 'LASER BREACH DETECTED',
         details: 'Perimeter breach at south-east sector',
       });
-      
-      // Auto-resolve after 20 seconds
-      setTimeout(() => {
-        setLaserBreach(false);
-        addEvent({
-          type: EventType.INFO,
-          message: 'Laser system restored',
-          details: 'Security breach resolved',
-        });
-      }, 20000);
     }
   };
 
@@ -89,7 +77,57 @@ const Dashboard = () => {
       timestamp: Date.now(),
       ...event,
     };
-    setEvents(prev => [newEvent, ...prev]);
+    setEvents(prev => {
+      const MAX_LOGS = 8;
+      return [newEvent, ...prev].slice(0, MAX_LOGS);
+    });
+  };
+
+  const handlePersonDetected = (personEvent: SecurityEvent) => {
+    setCurrentPersonEventId(personEvent.id);
+    
+    // Add person detection event with pending status
+    const existingPerson = events.find(e => 
+      e.object_name === 'person' && 
+      e.authorizationStatus === 'PENDING' && 
+      e.id === personEvent.id
+    );
+
+    if (!existingPerson) {
+      addEvent({
+        type: EventType.INFO,
+        message: 'Person detected',
+        object_name: 'person',
+        isPerson: true,
+        authorizationStatus: 'PENDING',
+        confidence: personEvent.confidence,
+        id: personEvent.id,
+      });
+    }
+  };
+
+  const handleAuthorizationUpdate = (eventId: string, status: 'AUTHORIZED' | 'UNAUTHORIZED') => {
+    setEvents(prevEvents => {
+      const updatedEvents = prevEvents.map(event => {
+        if (event.id === eventId) {
+          return {
+            ...event,
+            authorizationStatus: status,
+            type: status === 'UNAUTHORIZED' ? EventType.ALERT : EventType.INFO,
+            message: status === 'UNAUTHORIZED' 
+              ? 'Unauthorized person detected (Threat)'
+              : 'Authorized person detected',
+          };
+        }
+        return event;
+      });
+      return updatedEvents;
+    });
+
+    // Clear current person event after authorization
+    if (currentPersonEventId === eventId) {
+      setCurrentPersonEventId(null);
+    }
   };
 
   const handleExportLogs = (format: 'csv' | 'json') => {
@@ -97,8 +135,12 @@ const Dashboard = () => {
       ID: event.id,
       Timestamp: new Date(event.timestamp).toISOString(),
       Type: event.type,
-      Message: event.message,
-      Details: event.details,
+      Message: event.message || event.object_name,
+      Details: event.authorizationStatus 
+        ? `Status: ${event.authorizationStatus}`
+        : event.confidence 
+          ? `Accuracy: ${(event.confidence * 100).toFixed(1)}%`
+          : event.details,
     }));
 
     let data: string;
@@ -110,7 +152,6 @@ const Dashboard = () => {
       filename = `security-events-${Date.now()}.json`;
       mimeType = 'application/json';
     } else {
-      // CSV format
       const header = Object.keys(formattedEvents[0]).join(',');
       const csv = formattedEvents.map(row => 
         Object.values(row).map(value => 
@@ -122,7 +163,6 @@ const Dashboard = () => {
       mimeType = 'text/csv';
     }
 
-    // Create download link
     const blob = new Blob([data], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -195,16 +235,19 @@ const Dashboard = () => {
                 laserBreach={laserBreach}
                 selectedCamera={selectedCamera}
                 onCameraChange={setSelectedCamera}
+                onPersonDetected={handlePersonDetected}
+                onAuthorizationUpdate={handleAuthorizationUpdate}
+                currentPersonEventId={currentPersonEventId}
               />
             </ResizablePanel>
-
             <ResizableHandle withHandle />
-
             <ResizablePanel defaultSize={35} minSize={25}>
               <EventsLog 
                 events={events} 
                 onExport={handleExportLogs}
                 className="h-full"
+                onPersonDetected={handlePersonDetected}
+                onAuthorizationUpdate={handleAuthorizationUpdate}
               />
             </ResizablePanel>
           </ResizablePanelGroup>

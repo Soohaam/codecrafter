@@ -1,4 +1,3 @@
-
 export enum EventType {
   INFO = 'INFO',
   WARNING = 'WARNING',
@@ -7,8 +6,12 @@ export enum EventType {
 
 export interface SecurityEvent {
   id: string;
-  timestamp: number;
+  message?: string;
+  details?: string;
+  timestamp: number | string;
   type: EventType;
-  message: string;
-  details: string;
+  object_name?: string;
+  confidence?: number;
+  isPerson?: boolean; // Add to identify person detections
+  authorizationStatus?: 'AUTHORIZED' | 'UNAUTHORIZED' | 'PENDING'; // Add for face recognition status
 }
