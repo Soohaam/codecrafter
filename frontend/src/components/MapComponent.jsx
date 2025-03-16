@@ -446,49 +446,54 @@ const MapComponent = ({ environment, sensors, events, threats, viewMode, onDetec
     }, [environment]);
 
     // Track threats and generate alerts when they cross the laser perimeter
-    useEffect(() => {
-        // Update tracked threats
-        setTrackedThreats(prevTrackedThreats => {
-            // Update existing threats
-            const updatedThreats = threats.map(threat => {
-                // Find if we were already tracking this threat
-                const existingThreat = prevTrackedThreats.find(t => t.id === threat.id);
+    // Focused fix for the tracking threats useEffect loop
+// Replace the problematic useEffect in the MapComponent with this:
 
-                // Check if the threat is inside the perimeter
-                const isInsidePerimeter = threat.location && (
-                    Math.abs(threat.location.lat - basePosition[0]) <= laserPerimeterRadius &&
-                    Math.abs(threat.location.lng - basePosition[1]) <= laserPerimeterRadius
-                );
+useEffect(() => {
+    // Track threats and generate alerts when they cross the laser perimeter
+    // Update tracked threats without causing infinite state updates
+    const updatedThreats = threats.map(threat => {
+        // Find if we were already tracking this threat
+        const existingThreat = trackedThreats.find(t => t.id === threat.id);
 
-                // If newly inside perimeter, generate alert
-                if (isInsidePerimeter && existingThreat && !existingThreat.insidePerimeter) {
-                    const alertMessage = {
-                        id: `alert-${threat.id}-${Date.now()}`,
-                        message: `PERIMETER BREACH: ${threat.type || 'Unknown'} entity detected crossing laser perimeter`,
-                        severity: threat.severity,
-                        timestamp: Date.now(),
-                        location: threat.location
-                    };
+        // Check if the threat is inside the perimeter
+        const isInsidePerimeter = threat.location && (
+            Math.abs(threat.location.lat - basePosition[0]) <= laserPerimeterRadius &&
+            Math.abs(threat.location.lng - basePosition[1]) <= laserPerimeterRadius
+        );
 
-                    // Only generate alerts for perimeter crossings
-                    setAlerts(prev => [alertMessage, ...prev].slice(0, 10));
+        // If newly inside perimeter, generate alert
+        if (isInsidePerimeter && existingThreat && !existingThreat.insidePerimeter) {
+            const alertMessage = {
+                id: `alert-${threat.id}-${Date.now()}`,
+                message: `PERIMETER BREACH: ${threat.type || 'Unknown'} entity detected crossing laser perimeter`,
+                severity: threat.severity,
+                timestamp: Date.now(),
+                location: threat.location
+            };
 
-                    // Call the onDetectThreat callback if provided
-                    if (onDetectThreat) {
-                        onDetectThreat(threat, 'laser_perimeter');
-                    }
-                }
+            // Only generate alerts for perimeter crossings
+            setAlerts(prev => [alertMessage, ...prev].slice(0, 10));
 
-                // Return updated threat with inside perimeter status
-                return {
-                    ...threat,
-                    insidePerimeter: isInsidePerimeter
-                };
-            });
+            // Call the onDetectThreat callback if provided
+            if (onDetectThreat) {
+                onDetectThreat(threat, 'laser_perimeter');
+            }
+        }
 
-            return updatedThreats;
-        });
-    }, [threats, basePosition, laserPerimeterRadius, onDetectThreat]);
+        // Return updated threat with inside perimeter status
+        return {
+            ...threat,
+            insidePerimeter: isInsidePerimeter
+        };
+    });
+
+    // IMPORTANT: Only update state if the tracked threats have actually changed
+    // This check prevents the infinite update loop
+    if (JSON.stringify(updatedThreats) !== JSON.stringify(trackedThreats)) {
+        setTrackedThreats(updatedThreats);
+    }
+}, [threats, basePosition, laserPerimeterRadius, onDetectThreat, trackedThreats]);
 
     // Create sensor positions around the headquarters
     const generateSensorPositions = () => {
@@ -582,123 +587,123 @@ const MapComponent = ({ environment, sensors, events, threats, viewMode, onDetec
                     />
                 ))}
 
-              {/* Camera sensors and their fields of view */}
-{sensorPositions.camera.map((camera, idx) => (
-    <React.Fragment key={`camera-group-${idx}`}>
-        <Marker
-            position={camera.position}
-            icon={getSensorIcon('camera', 'active', sensorPriorities.camera || 'medium')}
-        >
-            <Popup>
-                <div>
-                    <strong>Camera {idx + 1}</strong>
-                    <div>Type: Camera</div>
-                    <div>Status: Active</div>
-                    <div>Priority: {sensorPriorities.camera || 'medium'}</div>
-                    <div>Range: 100m</div>
-                    <div>FOV: 90°</div>
-                    <div>Heading: {camera.heading}°</div>
-                    <div>Effectiveness: {
-                        environment.timeOfDay === 'night' ? 'Low' :
-                        environment.weather === 'fog' ? 'Low' :
-                        environment.weather === 'rain' ? 'Medium' : 'High'
-                    }</div>
-                </div>
-            </Popup>
-        </Marker>
-        <SensorFieldOfView
-            sensor={{ range: 100 }}
-            position={camera.position}
-            type="camera"
-            environment={environment}
-            headingAngle={camera.heading}
-            priority={sensorPriorities.camera || 'medium'}
-        />
-    </React.Fragment>
-))}
+                {/* Camera sensors and their fields of view */}
+                {sensorPositions.camera.map((camera, idx) => (
+                    <React.Fragment key={`camera-group-${idx}`}>
+                        <Marker
+                            position={camera.position}
+                            icon={getSensorIcon('camera', 'active', sensorPriorities.camera || 'medium')}
+                        >
+                            <Popup>
+                                <div>
+                                    <strong>Camera {idx + 1}</strong>
+                                    <div>Type: Camera</div>
+                                    <div>Status: Active</div>
+                                    <div>Priority: {sensorPriorities.camera || 'medium'}</div>
+                                    <div>Range: 100m</div>
+                                    <div>FOV: 90°</div>
+                                    <div>Heading: {camera.heading}°</div>
+                                    <div>Effectiveness: {
+                                        environment.timeOfDay === 'night' ? 'Low' :
+                                            environment.weather === 'fog' ? 'Low' :
+                                                environment.weather === 'rain' ? 'Medium' : 'High'
+                                    }</div>
+                                </div>
+                            </Popup>
+                        </Marker>
+                        <SensorFieldOfView
+                            sensor={{ range: 100 }}
+                            position={camera.position}
+                            type="camera"
+                            environment={environment}
+                            headingAngle={camera.heading}
+                            priority={sensorPriorities.camera || 'medium'}
+                        />
+                    </React.Fragment>
+                ))}
 
-{/* Laser sensors */}
-{sensorPositions.laser.map((laser, idx) => (
-    <Marker
-        key={`laser-${idx}`}
-        position={laser.position}
-        icon={getSensorIcon('laser', 'active', sensorPriorities.laser || 'medium')}
-    >
-        <Popup>
-            <div>
-                <strong>Laser {idx + 1}</strong>
-                <div>Type: Laser</div>
-                <div>Status: Active</div>
-                <div>Priority: {sensorPriorities.laser || 'medium'}</div>
-                <div>Range: Perimeter</div>
-                <div>Heading: {laser.heading}°</div>
-                <div>Effectiveness: {
-                    environment.weather === 'rain' ? 'Low' :
-                    environment.weather === 'fog' ? 'Medium' :
-                    environment.timeOfDay === 'night' ? 'Medium' : 'High'
-                }</div>
-            </div>
-        </Popup>
-    </Marker>
-))}
+                {/* Laser sensors */}
+                {sensorPositions.laser.map((laser, idx) => (
+                    <Marker
+                        key={`laser-${idx}`}
+                        position={laser.position}
+                        icon={getSensorIcon('laser', 'active', sensorPriorities.laser || 'medium')}
+                    >
+                        <Popup>
+                            <div>
+                                <strong>Laser {idx + 1}</strong>
+                                <div>Type: Laser</div>
+                                <div>Status: Active</div>
+                                <div>Priority: {sensorPriorities.laser || 'medium'}</div>
+                                <div>Range: Perimeter</div>
+                                <div>Heading: {laser.heading}°</div>
+                                <div>Effectiveness: {
+                                    environment.weather === 'rain' ? 'Low' :
+                                        environment.weather === 'fog' ? 'Medium' :
+                                            environment.timeOfDay === 'night' ? 'Medium' : 'High'
+                                }</div>
+                            </div>
+                        </Popup>
+                    </Marker>
+                ))}
 
-{/* Fiber optic sensors - placed around the middle perimeter */}
-{[0, 90, 180, 270].map((angle, idx) => {
-    const radians = (angle * Math.PI) / 180;
-    const position = [
-        basePosition[0] + (fiberPerimeterRadius * Math.cos(radians)),
-        basePosition[1] + (fiberPerimeterRadius * Math.sin(radians))
-    ];
+                {/* Fiber optic sensors - placed around the middle perimeter */}
+                {[0, 90, 180, 270].map((angle, idx) => {
+                    const radians = (angle * Math.PI) / 180;
+                    const position = [
+                        basePosition[0] + (fiberPerimeterRadius * Math.cos(radians)),
+                        basePosition[1] + (fiberPerimeterRadius * Math.sin(radians))
+                    ];
 
-    return (
-        <Marker
-            key={`fiber-${idx}`}
-            position={position}
-            icon={getSensorIcon('fiber', 'active', sensorPriorities.fiber || 'medium')}
-        >
-            <Popup>
-                <div>
-                    <strong>Fiber Optic {idx + 1}</strong>
-                    <div>Type: Fiber Optic</div>
-                    <div>Status: Active</div>
-                    <div>Priority: {sensorPriorities.fiber || 'medium'}</div>
-                    <div>Range: {(fiberPerimeterRadius * 111.32 * 1000).toFixed(0)}m</div>
-                    <div>Heading: {angle}°</div>
-                    <div>Effectiveness: {
-                        environment.weather === 'rain' ? 'High' :
-                        environment.weather === 'fog' ? 'High' :
-                        'High'
-                    }</div>
-                </div>
-            </Popup>
-        </Marker>
-    );
-})}
+                    return (
+                        <Marker
+                            key={`fiber-${idx}`}
+                            position={position}
+                            icon={getSensorIcon('fiber', 'active', sensorPriorities.fiber || 'medium')}
+                        >
+                            <Popup>
+                                <div>
+                                    <strong>Fiber Optic {idx + 1}</strong>
+                                    <div>Type: Fiber Optic</div>
+                                    <div>Status: Active</div>
+                                    <div>Priority: {sensorPriorities.fiber || 'medium'}</div>
+                                    <div>Range: {(fiberPerimeterRadius * 111.32 * 1000).toFixed(0)}m</div>
+                                    <div>Heading: {angle}°</div>
+                                    <div>Effectiveness: {
+                                        environment.weather === 'rain' ? 'High' :
+                                            environment.weather === 'fog' ? 'High' :
+                                                'High'
+                                    }</div>
+                                </div>
+                            </Popup>
+                        </Marker>
+                    );
+                })}
 
-{/* Add radar sensors */}
-{sensorPositions.radar.map((radar, idx) => (
-    <Marker
-        key={`radar-marker-${idx}`}
-        position={radar.position}
-        icon={getSensorIcon('radar', 'active', sensorPriorities.radar || 'medium')}
-    >
-        <Popup>
-            <div>
-                <strong>Radar {idx + 1}</strong>
-                <div>Type: Radar</div>
-                <div>Status: Active</div>
-                <div>Priority: {sensorPriorities.radar || 'medium'}</div>
-                <div>Range: 100m</div>
-                <div>Heading: {radar.heading}°</div>
-                <div>Effectiveness: {
-                    environment.weather === 'rain' ? 'High' :
-                    environment.weather === 'fog' ? 'High' :
-                    environment.timeOfDay === 'night' ? 'High' : 'Medium'
-                }</div>
-            </div>
-        </Popup>
-    </Marker>
-))}
+                {/* Add radar sensors */}
+                {sensorPositions.radar.map((radar, idx) => (
+                    <Marker
+                        key={`radar-marker-${idx}`}
+                        position={radar.position}
+                        icon={getSensorIcon('radar', 'active', sensorPriorities.radar || 'medium')}
+                    >
+                        <Popup>
+                            <div>
+                                <strong>Radar {idx + 1}</strong>
+                                <div>Type: Radar</div>
+                                <div>Status: Active</div>
+                                <div>Priority: {sensorPriorities.radar || 'medium'}</div>
+                                <div>Range: 100m</div>
+                                <div>Heading: {radar.heading}°</div>
+                                <div>Effectiveness: {
+                                    environment.weather === 'rain' ? 'High' :
+                                        environment.weather === 'fog' ? 'High' :
+                                            environment.timeOfDay === 'night' ? 'High' : 'Medium'
+                                }</div>
+                            </div>
+                        </Popup>
+                    </Marker>
+                ))}
 
                 {/* Display threat markers */}
                 {threats
