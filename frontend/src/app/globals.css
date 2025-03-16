@@ -208,7 +208,7 @@ html {
 /* Firefox (partial support) */
 * {
   scrollbar-width: thin; /* Slim scrollbar */
-  scrollbar-color: #01363a #1a1a2e; /* Thumb and track colors */
+  scrollbar-color: #026f77 #1a1a2e; /* Thumb and track colors */
 }
 
 /* Optional: Smooth scrolling behavior */

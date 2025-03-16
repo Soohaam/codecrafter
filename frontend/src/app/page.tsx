@@ -118,11 +118,11 @@ const HeroSection = () => {
             </p>
             
             <div className="flex flex-wrap gap-4">
-              <Button size="lg" className="gap-2 bg-surveillance-accent hover:bg-surveillance-accent/90 text-white shadow-glow-sm">
-                Explore Technology <ArrowRight className="w-4 h-4" />
+              <Button size="lg" className="gap-2 bg-surveillance-accent hover:bg-surveillance-accent/90 text-black shadow-glow-sm">
+                Virtualize <ArrowRight className="w-4 h-4" />
               </Button>
               <Button size="lg" variant="outline" className="border-surveillance-accent hover:bg-surveillance-accent/10 text-surveillance-accent">
-                View Demo
+                Explore
               </Button>
             </div>
             

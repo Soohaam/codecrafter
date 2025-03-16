@@ -63,14 +63,14 @@ const MonitoringPanel = ({ laserActive, laserBreach, selectedCamera, onCameraCha
     }
   }, [laserBreach, activeTab]); // Trigger loading when tab changes too
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      generateRandomObjects();
-      setLastUpdateTime(Date.now());
-    }, 8000);
-    generateRandomObjects();
-    return () => clearInterval(interval);
-  }, []);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     generateRandomObjects();
+  //     setLastUpdateTime(Date.now());
+  //   }, 8000);
+  //   generateRandomObjects();
+  //   return () => clearInterval(interval);
+  // }, []);
 
   useEffect(() => {
     if (laserBreach) {
@@ -80,14 +80,14 @@ const MonitoringPanel = ({ laserActive, laserBreach, selectedCamera, onCameraCha
           type: 'person',
           confidence: 0.92,
           timestamp: Date.now(),
-          location: 'South Perimeter'
+          location: 'stationary'
         },
         {
           id: `breach-${Date.now() + 1}`,
           type: 'person',
           confidence: 0.88,
           timestamp: Date.now() + 100,
-          location: 'South Perimeter'
+          location: 'stationary'
         }
       ];
       setDetectedObjects(prev => [...breachObjects, ...prev].slice(0, 8));
@@ -95,28 +95,28 @@ const MonitoringPanel = ({ laserActive, laserBreach, selectedCamera, onCameraCha
     }
   }, [laserBreach]);
 
-  const generateRandomObjects = () => {
-    const objectTypes: DetectedObject['type'][] = ['person', 'vehicle', 'animal', 'package', 'unknown'];
-    const locations = ['North Perimeter', 'South Perimeter', 'East Perimeter', 'West Perimeter', 'Main Entrance'];
-    const numObjects = Math.floor(Math.random() * 4);
+  // const generateRandomObjects = () => {
+  //   const objectTypes: DetectedObject['type'][] = ['person', 'vehicle', 'animal', 'package', 'unknown'];
+  //   const locations = ['North Perimeter', 'South Perimeter', 'East Perimeter', 'West Perimeter', 'Main Entrance'];
+  //   const numObjects = Math.floor(Math.random() * 4);
     
-    if (numObjects === 0) return;
+  //   if (numObjects === 0) return;
     
-    const newObjects: DetectedObject[] = [];
-    for (let i = 0; i < numObjects; i++) {
-      const type = objectTypes[Math.floor(Math.random() * objectTypes.length)];
-      const confidence = Math.round((0.7 + Math.random() * 0.29) * 100) / 100;
-      const location = locations[Math.floor(Math.random() * locations.length)];
-      newObjects.push({
-        id: Date.now().toString() + i,
-        type,
-        confidence,
-        timestamp: Date.now() - Math.floor(Math.random() * 10000),
-        location
-      });
-    }
-    setDetectedObjects(prev => [...newObjects, ...prev].slice(0, 8));
-  };
+  //   const newObjects: DetectedObject[] = [];
+  //   for (let i = 0; i < numObjects; i++) {
+  //     const type = objectTypes[Math.floor(Math.random() * objectTypes.length)];
+  //     const confidence = Math.round((0.7 + Math.random() * 0.29) * 100) / 100;
+  //     const location = locations[Math.floor(Math.random() * locations.length)];
+  //     newObjects.push({
+  //       id: Date.now().toString() + i,
+  //       type,
+  //       confidence,
+  //       timestamp: Date.now() - Math.floor(Math.random() * 10000),
+  //       location
+  //     });
+  //   }
+  //   setDetectedObjects(prev => [...newObjects, ...prev].slice(0, 8));
+  // };
 
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -142,17 +142,17 @@ const MonitoringPanel = ({ laserActive, laserBreach, selectedCamera, onCameraCha
       detection: {
         src: "http://localhost:5000/video_feed",
         alt: "Object Detection Feed",
-        label: "CAM-01 • South Perimeter"
+        label: "CAM-01 •"
       },
       thermal: {
         src: "http://localhost:5000/video_feed_thermal",
         alt: "Thermal Camera Feed",
-        label: "THERMAL • South Perimeter"
+        label: "THERMAL • CAM-01"
       },
       activity: {
         src: "http://localhost:5000/weapon_detection_feed",
         alt: "Activity Detection Feed",
-        label: "ACTIVITY • South Perimeter"
+        label: "ACTIVITY • CAM-01"
       }
     };
 
