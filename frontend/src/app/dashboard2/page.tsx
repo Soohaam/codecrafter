@@ -37,9 +37,46 @@ export default function Dashboard2() {
   // State for detected events and threats
   const [events, setEvents] = useState([]);
   const [threats, setThreats] = useState([]);
+  
+  // State for security parameters
+  const [securityParameters, setSecurityParameters] = useState({
+    sensorTypes: ["camera", "laser_perimeter", "fiber", "radar"],
+    threatTypes: ["movement", "intrusion", "anomaly", "perimeter breach"],
+    severityLevels: ["medium", "high"]
+  });
 
   // State for current view mode
   const [viewMode, setViewMode] = useState("normal"); // 'normal' or 'fiber'
+
+  // Handle perimeter breach detection from MapComponent
+  const handlePerimeterDetection = (threat, detectorType) => {
+    // Mark the threat as detected and record what detected it
+    const updatedThreats = threats.map(t => {
+      if (t.id === threat.id) {
+        return {
+          ...t,
+          detected: true,
+          detectedBy: detectorType || "laser_perimeter"
+        };
+      }
+      return t;
+    });
+    
+    setThreats(updatedThreats);
+    
+    // Log the perimeter breach event
+    const newEvent = {
+      id: Date.now(),
+      timestamp: new Date().toISOString(),
+      type: "perimeter_breach",
+      location: threat.location,
+      severity: threat.severity,
+      sensorType: detectorType || "laser_perimeter",
+      details: `Perimeter breach detected by ${detectorType || "laser perimeter"}`
+    };
+    
+    setEvents(prev => [newEvent, ...prev].slice(0, 100));
+  };
 
   // Mock detection of a new event
   const detectEvent = (type, location, severity) => {
@@ -62,6 +99,7 @@ export default function Dashboard2() {
         ...newEvent,
         status: "active",
         assessed: false,
+        detected: false, // Initially not detected by perimeter
       };
       setThreats((prev) => [newThreat, ...prev]);
     }
@@ -115,75 +153,82 @@ export default function Dashboard2() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [environment]);
+  }, []);
 
   // Handle environment change
   const updateEnvironment = (newEnvironment) => {
-    setEnvironment((prev) => ({ ...prev, ...newEnvironment }));
-
-    // Log environmental change
-    setEvents((prev) => [
-      {
+    setEnvironment((prev) => {
+      const updated = { ...prev, ...newEnvironment };
+      
+      // Log environmental change
+      const environmentChangeEvent = {
         id: Date.now(),
         timestamp: new Date().toISOString(),
         type: "environment_change",
         details: JSON.stringify(newEnvironment),
         severity: "info",
-      },
-      ...prev,
-    ]);
-
-    // Adjust sensor behavior based on new environment
-    const newSensorConfig = { ...sensorConfig };
-
-    // Example: Camera is less effective at night
-    if (
-      newEnvironment.timeOfDay === "night" &&
-      newSensorConfig.camera.status === "active"
-    ) {
-      newSensorConfig.camera.range = Math.floor(
-        newSensorConfig.camera.range * 0.6
-      );
-    } else if (
-      newEnvironment.timeOfDay === "day" &&
-      newSensorConfig.camera.status === "active"
-    ) {
-      newSensorConfig.camera.range = 100;
-    }
-
-    // Example: Laser is affected by weather
-    if (newEnvironment.weather === "fog" || newEnvironment.weather === "rain") {
-      newSensorConfig.laser.range = Math.floor(
-        newSensorConfig.laser.range * 0.7
-      );
-    } else {
-      newSensorConfig.laser.range = 50;
-    }
-
-    setSensorConfig(newSensorConfig);
+      };
+      
+      setEvents((prevEvents) => [environmentChangeEvent, ...prevEvents]);
+      
+      // Adjust sensor behavior based on new environment
+      const newSensorConfig = { ...sensorConfig };
+      
+      // Example: Camera is less effective at night
+      if (updated.timeOfDay === "night" && newSensorConfig.camera.status === "active") {
+        newSensorConfig.camera.range = Math.floor(newSensorConfig.camera.range * 0.6);
+      } else if (updated.timeOfDay === "day" && newSensorConfig.camera.status === "active") {
+        newSensorConfig.camera.range = 100;
+      }
+      
+      // Example: Laser is affected by weather
+      if (updated.weather === "fog" || updated.weather === "rain") {
+        newSensorConfig.laser.range = Math.floor(newSensorConfig.laser.range * 0.7);
+      } else {
+        newSensorConfig.laser.range = 50;
+      }
+      
+      setSensorConfig(newSensorConfig);
+      
+      return updated;
+    });
   };
 
   // Handle sensor configuration change
   const updateSensorConfig = (sensor, config) => {
-    setSensorConfig((prev) => ({
-      ...prev,
-      [sensor]: {
-        ...prev[sensor],
-        ...config,
-      },
-    }));
-
-    // Log sensor configuration change
-    setEvents((prev) => [
-      {
+    setSensorConfig((prev) => {
+      const updated = {
+        ...prev,
+        [sensor]: {
+          ...prev[sensor],
+          ...config,
+        }
+      };
+      
+      // Log sensor configuration change
+      const configChangeEvent = {
         id: Date.now(),
         timestamp: new Date().toISOString(),
         type: "sensor_config_change",
         details: `${sensor}: ${JSON.stringify(config)}`,
         severity: "info",
-      },
-      ...prev,
-    ]);
+      };
+      
+      setEvents((prevEvents) => [configChangeEvent, ...prevEvents]);
+      
+      return updated;
+    });
+  };
+
+  // Handle marking a threat as assessed
+  const handleThreatAssessment = (threatId, action) => {
+    setThreats(prevThreats => 
+      prevThreats.map(threat => 
+        threat.id === threatId 
+          ? { ...threat, assessed: true, status: action === 'dismiss' ? 'dismissed' : 'investigating' }
+          : threat
+      )
+    );
   };
 
   // Toggle view mode between normal and fiber
@@ -220,7 +265,7 @@ export default function Dashboard2() {
           <div className="row-span-2 bg-gray-800 rounded-lg overflow-hidden">
             <MapComponent
               environment={environment}
-              sensors={sensorsArray} // Now it's an array
+              sensors={sensorsArray}
               events={events.filter(
                 (e) =>
                   e.type !== "environment_change" &&
@@ -228,6 +273,7 @@ export default function Dashboard2() {
               )}
               threats={threats}
               viewMode={viewMode}
+              onDetectThreat={handlePerimeterDetection}
             />
           </div>
           <div className="bg-gray-800 rounded-lg p-4">
@@ -250,10 +296,18 @@ export default function Dashboard2() {
             <CameraFeed type="normal" environment={environment} />
           </div>
 
-            <div className="bg-gray-800 rounded-lg overflow-hidden p-2">
-              <EventLog events={events} />
-            </div>
-            
+          <div className="bg-gray-800 rounded-lg overflow-hidden p-2">
+            <ThreatAlerts 
+              threats={threats} 
+              securityParameters={securityParameters}
+              onInvestigate={(threatId) => handleThreatAssessment(threatId, 'investigate')}
+              onDismiss={(threatId) => handleThreatAssessment(threatId, 'dismiss')}
+            />
+          </div>
+
+          <div className="bg-gray-800 rounded-lg overflow-hidden p-2">
+            <EventLog events={events} />
+          </div>
         </div>
       </div>
     </div>

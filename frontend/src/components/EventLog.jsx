@@ -73,9 +73,9 @@ const EventLog = ({ events }) => {
           <div className="text-gray-400 text-center p-4">No events to display</div>
         ) : (
           <ul className="space-y-1 text-sm p-3">
-            {filteredEvents.map((event) => (
+            {filteredEvents.map((event, index) => (
               <li 
-                key={event.id} 
+                key={`${event.id}-${event.timestamp}-${index}`} 
                 className="border-b border-gray-700 pb-2 last:border-b-0 hover:bg-gray-800 transition-colors duration-150 rounded-sm px-2"
               >
                 <div className="flex justify-between items-center">
