@@ -35,7 +35,7 @@ const DraggableFigure: React.FC<DraggableFigureProps> = ({ figure, position }) =
       width = figure.width * scale;
     } else if (figure.type === 'large-animal') {
       // Large animals should be 2-3 beams high
-      const targetHeight = BEAM_SPACING * 2.2;
+      const targetHeight = BEAM_SPACING * 3.5;
       const scale = targetHeight / figure.height;
       height = targetHeight;
       width = figure.width * scale;
@@ -47,7 +47,7 @@ const DraggableFigure: React.FC<DraggableFigureProps> = ({ figure, position }) =
       width = figure.width * scale;
     } else if (figure.type === 'vehicle') {
       // Vehicles should be about 1.5 beams high
-      const targetHeight = BEAM_SPACING * 1.5;
+      const targetHeight = BEAM_SPACING * 3;
       const scale = targetHeight / figure.height;
       height = targetHeight;
       width = figure.width * scale;

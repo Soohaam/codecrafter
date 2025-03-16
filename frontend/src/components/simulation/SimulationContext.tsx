@@ -35,7 +35,7 @@ const AVAILABLE_FIGURES: Figure[] = [
     type: 'small-animal',
     name: 'Rabbit',
     width: 30,
-    height: 20,
+    height: 30,
     legs: 4,
     speed: 10,
     threatLevel: 'low',

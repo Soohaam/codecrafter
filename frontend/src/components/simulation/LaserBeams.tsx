@@ -83,7 +83,7 @@ const LaserBeams: React.FC<LaserBeamsProps> = ({ alarmActive }) => {
       
       {/* Laser emitter box */}
       <div 
-        className="absolute w-6 h-64 bg-gray-800 rounded-md"
+        className="absolute w-6 h-82 bg-gray-800 rounded-md"
         style={{
           left: `${laserX - 12}px`, 
           top: `${beamPositions[0] - 10}px`,
