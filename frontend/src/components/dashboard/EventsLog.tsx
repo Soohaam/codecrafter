@@ -17,7 +17,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { EventType, SecurityEvent } from '@/types/security';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:5000', {
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const socket = io(BACKEND_URL, {
   transports: ['websocket', 'polling'],
   reconnection: true,
   reconnectionAttempts: 5,
