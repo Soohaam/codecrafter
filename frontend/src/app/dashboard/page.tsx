@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
-import { User, UserIcon, Mail, AlertCircle, LayoutDashboard, Activity } from "lucide-react";
+import { User, UserIcon, Mail, AlertCircle, LayoutDashboard, Activity, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import VoiceComponent from "@/components/VoiceComponent";
 
 export default function Dashboard() {
   const { isLoaded, userId } = useAuth();
@@ -121,6 +122,15 @@ export default function Dashboard() {
               <span className="font-medium">Pro Tip:</span> Explore the quick actions panel to discover more functionality.
             </p>
           </div>
+        </div>
+        
+        {/* Voice Component in a dedicated section */}
+        <div className="mt-8 bg-white/90 backdrop-blur-sm rounded-xl shadow-md p-6 border border-purple-100">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-medium text-gray-700">Voice Assistant</h3>
+            <Mic className="w-5 h-5 text-indigo-500" />
+          </div>
+          <VoiceComponent />
         </div>
       </div>
     </div>
