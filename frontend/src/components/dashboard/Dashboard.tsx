@@ -21,7 +21,7 @@ const Dashboard = () => {
   const [laserBreach, setLaserBreach] = useState(false);
   const [mapType, setMapType] = useState<'standard' | 'fiber'>('standard');
   const [events, setEvents] = useState<SecurityEvent[]>([]);
-  const [rangeSize, setRangeSize] = useState(300); // meters
+  const [rangeSize, setRangeSize] = useState(400); // meters
   const [selectedCamera, setSelectedCamera] = useState('cam-south');
   const [currentPersonEventId, setCurrentPersonEventId] = useState<string | null>(null);
   const [frequencyActive, setFrequencyActive] = useState(false); // State for frequency fluctuation

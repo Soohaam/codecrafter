@@ -276,12 +276,12 @@ export default function Dashboard2() {
               onDetectThreat={handlePerimeterDetection}
             />
           </div>
-          <div className="bg-gray-800 rounded-lg p-4">
+          {/* <div className="bg-gray-800 rounded-lg p-4">
             <SensorControls
               sensorConfig={sensorConfig}
               updateSensorConfig={updateSensorConfig}
             />
-          </div>
+          </div> */}
         </div>
 
         {/* Right column - Feeds and logs */}
@@ -296,14 +296,14 @@ export default function Dashboard2() {
             <CameraFeed type="normal" environment={environment} />
           </div>
 
-          <div className="bg-gray-800 rounded-lg overflow-hidden p-2">
+          {/* <div className="bg-gray-800 rounded-lg overflow-hidden p-2">
             <ThreatAlerts 
               threats={threats} 
               securityParameters={securityParameters}
               onInvestigate={(threatId) => handleThreatAssessment(threatId, 'investigate')}
               onDismiss={(threatId) => handleThreatAssessment(threatId, 'dismiss')}
             />
-          </div>
+          </div> */}
 
           <div className="bg-gray-800 rounded-lg overflow-hidden p-2">
             <EventLog events={events} />

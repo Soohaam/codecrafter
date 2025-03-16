@@ -39,10 +39,10 @@ const Navbar = () => {
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-300 transition-all duration-300 group-hover:w-full"></span>
             </Link>
             <Link
-              href="/landing-page"
+              href="/dashboard2"
               className="text-white font-medium hover:text-indigo-300 transition-colors duration-200 relative group"
             >
-              Drone
+              Simulation
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-indigo-300 transition-all duration-300 group-hover:w-full"></span>
             </Link>
             <button
