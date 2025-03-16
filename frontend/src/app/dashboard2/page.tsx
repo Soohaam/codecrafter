@@ -249,17 +249,11 @@ export default function Dashboard2() {
           <div className="row-span-1 bg-gray-800 rounded-lg overflow-hidden">
             <CameraFeed type="normal" environment={environment} />
           </div>
-          <div className="row-span-1 bg-gray-800 rounded-lg overflow-hidden">
-            <CameraFeed type="thermal" environment={environment} />
-          </div>
-          <div className="row-span-1 grid grid-cols-2 gap-4">
+
             <div className="bg-gray-800 rounded-lg overflow-hidden p-2">
               <EventLog events={events} />
             </div>
-            <div className="bg-gray-800 rounded-lg overflow-hidden p-2">
-              <ThreatAlerts threats={threats} />
-            </div>
-          </div>
+            
         </div>
       </div>
     </div>

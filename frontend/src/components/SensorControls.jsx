@@ -15,17 +15,20 @@ const SensorControls = ({ sensorConfig, updateSensorConfig }) => {
   };
   
   return (
-    <div className="h-full">
-      <h2 className="text-lg font-semibold mb-3">Sensor Controls</h2>
-      <div className="grid grid-cols-2 gap-4">
+    <div className="h-full flex flex-col">
+      <h2 className="text-lg font-semibold mb-3 text-white">Sensor Controls</h2>
+      <div className="flex-1 overflow-y-auto grid grid-cols-2 gap-4">
         {sensors.map(sensor => (
-          <div key={sensor} className="bg-gray-700 p-3 rounded">
+          <div 
+            key={sensor} 
+            className="bg-gray-700 p-3 rounded text-white flex flex-col min-h-0"
+          >
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-medium capitalize">{sensor} Sensor</h3>
               <div className={`w-3 h-3 rounded-full ${getStatusColor(sensorConfig[sensor].status)}`}></div>
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-2 flex-1">
               {/* Sensitivity control */}
               <div>
                 <label htmlFor={`${sensor}-sensitivity`} className="block text-sm text-gray-300">
@@ -35,7 +38,7 @@ const SensorControls = ({ sensorConfig, updateSensorConfig }) => {
                   id={`${sensor}-sensitivity`}
                   value={sensorConfig[sensor].sensitivity}
                   onChange={(e) => updateSensorConfig(sensor, { sensitivity: e.target.value })}
-                  className="w-full bg-gray-600 text-white text-sm rounded p-1"
+                  className="w-full bg-gray-600 text-white text-sm rounded p-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -52,7 +55,7 @@ const SensorControls = ({ sensorConfig, updateSensorConfig }) => {
                   id={`${sensor}-status`}
                   value={sensorConfig[sensor].status}
                   onChange={(e) => updateSensorConfig(sensor, { status: e.target.value })}
-                  className="w-full bg-gray-600 text-white text-sm rounded p-1"
+                  className="w-full bg-gray-600 text-white text-sm rounded p-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="active">Active</option>
                   <option value="standby">Standby</option>
@@ -72,7 +75,7 @@ const SensorControls = ({ sensorConfig, updateSensorConfig }) => {
                   max={500}
                   value={sensorConfig[sensor].range}
                   onChange={(e) => updateSensorConfig(sensor, { range: parseInt(e.target.value) })}
-                  className="w-full"
+                  className="w-full accent-blue-500"
                 />
               </div>
             </div>

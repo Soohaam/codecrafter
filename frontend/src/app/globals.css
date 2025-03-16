@@ -134,6 +134,88 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px; /* Very thin scrollbar */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #666; /* Subtle gray for thumb */
+  border-radius: 2px; /* Rounded edges */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #888; /* Lighter on hover */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #2d3748; /* Dark track to match theme */
+}
+
+.overflow-y-auto::-webkit-scrollbar {
+  width: 4px;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background-color: #666;
+  border-radius: 2px;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background-color: #888;
+}
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* styles/globals.css */
+
+/* Apply to all scrollbars globally */
+html {
+  /* Ensure scrollbars are always visible if content overflows */
+  overflow-y: scroll;
+  overflow-x: auto;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 10px; /* Slim, futuristic width */
+  height: 10px; /* For horizontal scrollbars */
+}
+
+::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%); /* Dark gradient track */
+  border-radius: 5px; /* Rounded edges */
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); /* Subtle inner shadow */
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #00ddeb, #ff007a); /* Sexy neon gradient */
+  border-radius: 5px; /* Rounded thumb */
+  box-shadow: 0 0 10px rgba(0, 221, 235, 0.7), /* Glowing effect */
+              0 0 15px rgba(255, 0, 122, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Thin futuristic border */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #00ffcc, #ff00cc); /* Brighter on hover */
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.9), /* Enhanced glow */
+              0 0 20px rgba(255, 0, 204, 0.7);
+}
+
+/* Corner where vertical and horizontal scrollbars meet */
+::-webkit-scrollbar-corner {
+  background: #1a1a2e; /* Match track */
+}
+
+/* Firefox (partial support) */
+* {
+  scrollbar-width: thin; /* Slim scrollbar */
+  scrollbar-color: #01363a #1a1a2e; /* Thumb and track colors */
+}
+
+/* Optional: Smooth scrolling behavior */
+html {
+  scroll-behavior: smooth;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

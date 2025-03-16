@@ -150,7 +150,7 @@ const MonitoringPanel = ({ laserActive, laserBreach, selectedCamera, onCameraCha
         label: "THERMAL • South Perimeter"
       },
       activity: {
-        src: "http://localhost:5000/activity_feed",
+        src: "http://localhost:5000/weapon_detection_feed",
         alt: "Activity Detection Feed",
         label: "ACTIVITY • South Perimeter"
       }
@@ -225,7 +225,7 @@ const MonitoringPanel = ({ laserActive, laserBreach, selectedCamera, onCameraCha
           </TabsTrigger>
           <TabsTrigger value="activity" className="flex items-center">
             <List className="h-3 w-3 mr-1" />
-            <span>Activity</span>
+            <span>Weapon Detection</span>
           </TabsTrigger>
         </TabsList>
         
